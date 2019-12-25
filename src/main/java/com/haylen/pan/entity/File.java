@@ -6,6 +6,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 /**
+ * 文件
  * @author haylen
  * @date 2019-12-25
  */
@@ -23,6 +24,9 @@ public class File {
     private Long ownerId;
     @Column(columnDefinition = "varchar(64)", nullable = false)
     private String name;
+    /**
+     * 用于储存和检索文件
+     */
     @Column(name = "save_key", columnDefinition = "varchar(64)", nullable = false)
     private String saveKey;
     @Column(name = "media_type", columnDefinition = "varchar(64)")

@@ -6,6 +6,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 /**
+ * 目录
  * @author haylen
  * @date 2019-12-25
  */
@@ -19,7 +20,9 @@ public class Catalog {
     private Long id;
     @Column(name = "owner_id", columnDefinition = "bigint unsigned", nullable = false)
     private Long ownerId;
-    /* 父目录Id */
+    /**
+     * 父目录Id
+     */
     @Column(name = "parent_id", columnDefinition = "bigint unsigned")
     private Long parentId;
     @Column(name = "name", columnDefinition = "varchar(64)", nullable = false)
