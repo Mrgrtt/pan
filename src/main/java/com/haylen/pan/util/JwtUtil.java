@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.crypto.SecretKey;
-import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
 /**
@@ -33,35 +32,14 @@ final public class JwtUtil {
                 .compact();
     }
 
-    public static boolean validateToken(HttpServletRequest request) {
-        String token = getTokenFromRequest(request);
-        if (token == null) {
-            return false;
-        }
-        return validateToken(token);
-    }
-
-    private static boolean validateToken(String token) {
+    public static String getUsernameByToken(String token) {
         try {
-            Jwts.parser().setSigningKey(secret)
-                    .parseClaimsJws(token).getBody();
+            return Jwts.parser().setSigningKey(secret)
+                    .parseClaimsJws(token).getBody().getSubject();
         } catch (Exception e) {
             log.info("jwt格式验证失败：{}", token);
-            return false;
-        }
-        return true;
-    }
-
-    private static String getTokenFromRequest(HttpServletRequest request) {
-        String header = request.getHeader(requestHeader);
-        if (header == null) {
             return null;
         }
-        if (!header.startsWith(tokenHead)) {
-            return null;
-        }
-        /* 返回'Bearer '后面的部分 */
-        return header.substring(tokenHead.length() + 1);
     }
 
     private static Date getExpirationDate() {
