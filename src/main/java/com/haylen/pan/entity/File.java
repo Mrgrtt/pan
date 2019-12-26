@@ -27,7 +27,7 @@ public class File {
     /**
      * 用于储存和检索文件
      */
-    @Column(name = "save_key", columnDefinition = "varchar(64)", nullable = false)
+    @Column(name = "save_key", columnDefinition = "varchar(64)", nullable = false, unique = true)
     private String saveKey;
     @Column(name = "media_type", columnDefinition = "varchar(64)")
     private String mediaType;

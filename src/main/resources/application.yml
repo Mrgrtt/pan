@@ -1,3 +1,8 @@
 spring:
   profiles:
     active: dev
+jwt:
+  requestHeader: Authorization
+  tokenHead: Bearer
+  secret: panpanpanpanppppppppppanpanpooooooooooooooooooooanpan
+  expiration: 86400 #单位秒

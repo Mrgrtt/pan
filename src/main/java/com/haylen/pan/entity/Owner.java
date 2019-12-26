@@ -17,7 +17,7 @@ public class Owner {
     @GeneratedValue
     @Column(columnDefinition = "bigint unsigned")
     private Long id;
-    @Column(name = "username", columnDefinition = "varchar(64)", nullable = false)
+    @Column(name = "username", columnDefinition = "varchar(64)", nullable = false, unique = true)
     private String username;
     @Column(name = "password", columnDefinition = "char(64)", nullable = false)
     private String password;
