@@ -41,6 +41,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
+                .antMatchers("/owner/register*")
+                .permitAll()
                 .anyRequest()
                 .authenticated();
         http.headers().cacheControl().disable();
