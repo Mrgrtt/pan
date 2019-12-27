@@ -24,7 +24,7 @@ public class OwnerController {
         if (ownerService.register(ownerParam) == null) {
             return CommonResult.failed("用户名已存在");
         }
-        return CommonResult.success(null, "注册成功");
+        return CommonResult.success("", "注册成功");
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)

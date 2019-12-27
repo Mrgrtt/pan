@@ -18,7 +18,7 @@ public class File {
     @GeneratedValue
     @Column(columnDefinition = "bigint unsigned")
     private Long id;
-    @Column(name = "catalog_id", columnDefinition = "bigint unsigned")
+    @Column(name = "catalog_id", columnDefinition = "bigint unsigned default 0")
     private Long catalogId;
     @Column(name = "owner_id", columnDefinition = "bigint unsigned", nullable = false)
     private Long ownerId;

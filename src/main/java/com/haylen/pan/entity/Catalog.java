@@ -23,7 +23,7 @@ public class Catalog {
     /**
      * 父目录Id
      */
-    @Column(name = "parent_id", columnDefinition = "bigint unsigned")
+    @Column(name = "parent_id", columnDefinition = "bigint unsigned default 0", nullable = false)
     private Long parentId;
     @Column(name = "name", columnDefinition = "varchar(64)", nullable = false)
     private String name;

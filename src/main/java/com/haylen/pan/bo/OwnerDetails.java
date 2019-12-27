@@ -1,6 +1,7 @@
 package com.haylen.pan.bo;
 
 import com.haylen.pan.entity.Owner;
+import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -10,6 +11,7 @@ import java.util.Collection;
  * @author haylen
  * @date 2019-12-26
  */
+@Data
 public class OwnerDetails implements UserDetails {
     private Owner owner;
 

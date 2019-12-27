@@ -5,6 +5,7 @@ import com.haylen.pan.dto.OwnerParam;
 import com.haylen.pan.entity.Owner;
 
 /**
+ * 用户服务
  * @author haylen
  * @date 2019-12-26
  */
@@ -35,4 +36,10 @@ public interface OwnerService {
      * @return Token
      */
     String login(String username, String password);
+
+    /**
+     * 获取现在登录的用户
+     * @return 现在登录的用户
+     */
+    Owner getCurrentOwner();
 }

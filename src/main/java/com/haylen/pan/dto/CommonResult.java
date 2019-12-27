@@ -44,29 +44,29 @@ public class CommonResult<T> {
      * 失败返回结果
      * @param errorCode 错误码
      */
-    public static <T> CommonResult<T> failed(ResultCode errorCode) {
-        return new CommonResult<T>(errorCode.getCode(), errorCode.getMessage(), null);
+    public static CommonResult<String> failed(ResultCode errorCode) {
+        return new CommonResult<>(errorCode.getCode(), errorCode.getMessage(), "");
     }
 
     /**
      * 失败返回结果
      * @param message 提示信息
      */
-    public static <T> CommonResult<T> failed(String message) {
-        return new CommonResult<T>(ResultCode.FAILED.getCode(), message, null);
+    public static CommonResult<String> failed(String message) {
+        return new CommonResult<>(ResultCode.FAILED.getCode(), message, "");
     }
 
     /**
      * 失败返回结果
      */
-    public static <T> CommonResult<T> failed() {
+    public static CommonResult<String> failed() {
         return failed(ResultCode.FAILED);
     }
 
     /**
      * 参数验证失败返回结果
      */
-    public static <T> CommonResult<T> validateFailed() {
+    public static CommonResult<String> validateFailed() {
         return failed(ResultCode.VALIDATE_FAILED);
     }
 
@@ -74,8 +74,8 @@ public class CommonResult<T> {
      * 参数验证失败返回结果
      * @param message 提示信息
      */
-    public static <T> CommonResult<T> validateFailed(String message) {
-        return new CommonResult<T>(ResultCode.VALIDATE_FAILED.getCode(), message, null);
+    public static CommonResult<String> validateFailed(String message) {
+        return new CommonResult<>(ResultCode.VALIDATE_FAILED.getCode(), message, "");
     }
 
     /**

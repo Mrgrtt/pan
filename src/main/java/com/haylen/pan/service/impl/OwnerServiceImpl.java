@@ -7,6 +7,7 @@ import com.haylen.pan.repository.OwnerRepository;
 import com.haylen.pan.service.OwnerService;
 import com.haylen.pan.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -64,5 +65,12 @@ public class OwnerServiceImpl implements OwnerService {
             return null;
         }
         return jwtUtil.builtToken(username);
+    }
+
+    @Override
+    public Owner getCurrentOwner() {
+        OwnerDetails details = (OwnerDetails) SecurityContextHolder
+                .getContext().getAuthentication().getPrincipal();
+        return details.getOwner();
     }
 }
