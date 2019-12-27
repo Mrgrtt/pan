@@ -4,6 +4,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -13,17 +14,18 @@ import java.util.Date;
  * @date 2019-12-26
  */
 @Slf4j
-final public class JwtUtil {
+@Component
+public class JwtUtil {
     @Value("${jwt.secret}")
-    private static String secret;
+    private String secret;
     @Value("${jwt.expiration}")
-    private static long expirationTime;
+    private long expirationTime;
     @Value("${jwt.requestHeader}")
-    private static String requestHeader;
+    private String requestHeader;
     @Value("${jwt.tokenHead}")
-    private static String tokenHead;
+    private String tokenHead;
 
-    public static String builtToken(String username) {
+    public String builtToken(String username) {
         SecretKey key = Keys.hmacShaKeyFor(secret.getBytes());
         return Jwts.builder().setIssuedAt(new Date())
                 .setExpiration(getExpirationDate())
@@ -32,9 +34,9 @@ final public class JwtUtil {
                 .compact();
     }
 
-    public static String getUsernameByToken(String token) {
+    public String getUsernameByToken(String token) {
         try {
-            return Jwts.parser().setSigningKey(secret)
+            return Jwts.parser().setSigningKey(Keys.hmacShaKeyFor(secret.getBytes()))
                     .parseClaimsJws(token).getBody().getSubject();
         } catch (Exception e) {
             log.info("jwt格式验证失败：{}", token);
@@ -42,7 +44,7 @@ final public class JwtUtil {
         }
     }
 
-    private static Date getExpirationDate() {
+    private Date getExpirationDate() {
         return new Date(System.currentTimeMillis() + expirationTime * 1000);
     }
 }

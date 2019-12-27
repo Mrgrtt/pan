@@ -4,5 +4,5 @@ spring:
 jwt:
   requestHeader: Authorization
   tokenHead: Bearer
-  secret: panpanpanpanppppppppppanpanpooooooooooooooooooooanpan
+  secret: panpanpanpanppppppppppanpanpoooooooooooooooooohjforehfrehgrhwpbfweooanpan
   expiration: 86400 #单位秒

@@ -27,6 +27,8 @@ public class JwtFilter extends OncePerRequestFilter {
     private String requestHeader;
     @Value("${jwt.tokenHead}")
     private String tokenHead;
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -36,7 +38,7 @@ public class JwtFilter extends OncePerRequestFilter {
         if (authHeader != null && authHeader.startsWith(this.tokenHead)) {
             // "Bearer "后为token
             String token = authHeader.substring(this.tokenHead.length() + 1);
-            String username = JwtUtil.getUsernameByToken(token);
+            String username = jwtUtil.getUsernameByToken(token);
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
                 UsernamePasswordAuthenticationToken authentication =

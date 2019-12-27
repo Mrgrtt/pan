@@ -21,11 +21,18 @@ public interface OwnerService {
      * @return 用户细节
      */
     OwnerDetails getOwnerDetailsByUsername(String name);
-
     /**
      * 注册用户
      * @param ownerParam 注册参数
      * @return 成功注册用户，失败null.
      */
     Owner register(OwnerParam ownerParam);
+
+    /**
+     * 用户登录
+     * @param username 用户名
+     * @param password 密码
+     * @return Token
+     */
+    String login(String username, String password);
 }
