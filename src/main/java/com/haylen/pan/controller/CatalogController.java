@@ -22,10 +22,11 @@ public class CatalogController {
     @RequestMapping(value = "/create", method = RequestMethod.POST)
     public CommonResult create(@RequestParam(name = "parent_id", defaultValue = "0") Long parentId,
                                @NotEmpty @RequestParam String name) {
-        if (catalogService.create(parentId, name) == null) {
+        Catalog catalog = catalogService.create(parentId, name);
+        if (catalog == null) {
             return CommonResult.failed("创建目录失败");
         }
-        return CommonResult.success("", "创建目录成功");
+        return CommonResult.success(catalog, "创建目录成功");
     }
 
     @RequestMapping(value = "/list/{id}")

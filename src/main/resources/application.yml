@@ -1,6 +1,10 @@
 spring:
   profiles:
     active: dev
+  servlet:
+    multipart:
+      max-request-size: 1024MB
+      max-file-size: 1024MB
 jwt:
   requestHeader: Authorization
   tokenHead: Bearer

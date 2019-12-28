@@ -24,16 +24,12 @@ public class CatalogServiceImpl implements CatalogService {
 
     @Override
     public Catalog create(Long parentId, String name) {
-
         /* 父目录是否存在 */
-        if (parentId != 0) {
-            Optional<Catalog> parent = catalogRepository.findById(parentId);
-            if (!parent.isPresent()) {
-                return null;
-            }
+        if (existed(parentId)) {
+            return null;
         }
         /* 目录是否已存在 */
-        if (isExisted(parentId, ownerService.getCurrentOwner().getId(), name)) {
+        if (existed(parentId, name)) {
             return null;
         }
         Catalog catalog = new Catalog();
@@ -58,7 +54,8 @@ public class CatalogServiceImpl implements CatalogService {
         if (newParentId.equals(id)) {
             return 0;
         }
-        if (newParentId != 0 && !catalogRepository.findById(newParentId).isPresent()) {
+        /* 该父目录是否存在 */
+        if (!existed(newParentId)) {
             return 0;
         }
         Optional<Catalog> optionalCatalog = catalogRepository.findById(id);
@@ -66,7 +63,7 @@ public class CatalogServiceImpl implements CatalogService {
             return 0;
         }
         /* 同一目录下，是否已存在该名称目录 */
-        if (isExisted(newParentId, id, optionalCatalog.get().getName())) {
+        if (existed(newParentId, optionalCatalog.get().getName())) {
             return 0;
         }
         return catalogRepository.changeParent(newParentId, LocalDateTime.now(), id);
@@ -79,13 +76,22 @@ public class CatalogServiceImpl implements CatalogService {
             return 0;
         }
         /* 同一目录下，是否已存在该名称目录 */
-        if(isExisted(optionalCatalog.get().getParentId(), id, newName)) {
+        if(existed(optionalCatalog.get().getParentId(), newName)) {
             return 0;
         }
         return catalogRepository.rename(newName, LocalDateTime.now(), id);
     }
 
-    private boolean isExisted(Long parentId, Long id, String name) {
+    @Override
+    public boolean existed(Long id) {
+        Optional<Catalog> optionalCatalog = catalogRepository.findById(id);
+        if (id !=0 && !optionalCatalog.isPresent()) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean existed(Long parentId, String name) {
         Catalog catalog = catalogRepository.findCatalogByParentIdAndOwnerIdAndName(
                 parentId, ownerService.getCurrentOwner().getId(), name);
         if (catalog != null) {

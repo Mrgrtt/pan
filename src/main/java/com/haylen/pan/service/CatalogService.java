@@ -38,4 +38,11 @@ public interface CatalogService {
      * @return 结果
      */
     int rename(String newName, Long id);
+
+    /**
+     * 目录是否存在
+     * @param id 目录id
+     * @return 结果
+     */
+    boolean existed(Long id);
 }

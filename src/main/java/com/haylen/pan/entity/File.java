@@ -27,9 +27,9 @@ public class File {
     /**
      * 用于储存和检索文件
      */
-    @Column(name = "save_key", columnDefinition = "varchar(64)", nullable = false, unique = true)
-    private String saveKey;
-    @Column(name = "media_type", columnDefinition = "varchar(64)")
+    @Column(name = "storage_key", columnDefinition = "varchar(64)", nullable = false, unique = true)
+    private String storageKey;
+    @Column(name = "media_type", columnDefinition = "varchar(64) default ''")
     private String mediaType;
     @Column(name = "gmt_create", columnDefinition = "datetime", nullable = false)
     private LocalDateTime gmtCreate;
