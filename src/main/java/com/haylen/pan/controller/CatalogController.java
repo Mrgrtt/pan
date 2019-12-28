@@ -36,10 +36,19 @@ public class CatalogController {
 
     @RequestMapping(value = "/move", method = RequestMethod.POST)
     public CommonResult move(@RequestParam(name = "new_parent_id", defaultValue = "0") Long newParentId,
-                             @RequestParam Long id) {
+                             @RequestParam(required = true) Long id) {
         if (catalogService.move(newParentId, id) <= 0) {
             return CommonResult.failed("移动目录失败");
         }
         return CommonResult.success("", "移动目录成功");
+    }
+
+    @RequestMapping(value = "/rename", method = RequestMethod.POST)
+    public CommonResult rename(@NotEmpty @RequestParam(name = "new_name") String newName,
+                               @RequestParam(required = true) Long id) {
+        if (catalogService.rename(newName, id) == 0) {
+            return CommonResult.failed("重命名失败");
+        }
+        return CommonResult.success("", "重命名目录成功");
     }
 }

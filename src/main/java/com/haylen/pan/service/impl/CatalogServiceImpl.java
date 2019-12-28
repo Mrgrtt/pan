@@ -24,12 +24,7 @@ public class CatalogServiceImpl implements CatalogService {
 
     @Override
     public Catalog create(Long parentId, String name) {
-        /* 目录是否已存在 */
-        Catalog catalog = catalogRepository.findCatalogByParentIdAndOwnerIdAndName(
-                parentId, ownerService.getCurrentOwner().getId(), name);
-        if (catalog != null) {
-            return null;
-        }
+
         /* 父目录是否存在 */
         if (parentId != 0) {
             Optional<Catalog> parent = catalogRepository.findById(parentId);
@@ -37,7 +32,11 @@ public class CatalogServiceImpl implements CatalogService {
                 return null;
             }
         }
-        catalog = new Catalog();
+        /* 目录是否已存在 */
+        if (isExisted(parentId, ownerService.getCurrentOwner().getId(), name)) {
+            return null;
+        }
+        Catalog catalog = new Catalog();
         catalog.setName(name);
         catalog.setGmtCreate(LocalDateTime.now());
         catalog.setGmtModified(LocalDateTime.now());
@@ -55,9 +54,43 @@ public class CatalogServiceImpl implements CatalogService {
 
     @Override
     public int move(Long newParentId, Long id) {
+        /* 禁止将自身设为其父目录 */
+        if (newParentId.equals(id)) {
+            return 0;
+        }
         if (newParentId != 0 && !catalogRepository.findById(newParentId).isPresent()) {
             return 0;
         }
-        return catalogRepository.changeParent(newParentId, id);
+        Optional<Catalog> optionalCatalog = catalogRepository.findById(id);
+        if (!optionalCatalog.isPresent()) {
+            return 0;
+        }
+        /* 同一目录下，是否已存在该名称目录 */
+        if (isExisted(newParentId, id, optionalCatalog.get().getName())) {
+            return 0;
+        }
+        return catalogRepository.changeParent(newParentId, LocalDateTime.now(), id);
+    }
+
+    @Override
+    public int rename(String newName, Long id) {
+        Optional<Catalog> optionalCatalog = catalogRepository.findById(id);
+        if (!optionalCatalog.isPresent()) {
+            return 0;
+        }
+        /* 同一目录下，是否已存在该名称目录 */
+        if(isExisted(optionalCatalog.get().getParentId(), id, newName)) {
+            return 0;
+        }
+        return catalogRepository.rename(newName, LocalDateTime.now(), id);
+    }
+
+    private boolean isExisted(Long parentId, Long id, String name) {
+        Catalog catalog = catalogRepository.findCatalogByParentIdAndOwnerIdAndName(
+                parentId, ownerService.getCurrentOwner().getId(), name);
+        if (catalog != null) {
+            return true;
+        }
+        return false;
     }
 }

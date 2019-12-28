@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -36,7 +37,18 @@ public interface CatalogRepository extends JpaRepository<Catalog, Long> {
      * @return 修改结果
      */
     @Modifying
-    @Transactional
-    @Query("update Catalog c set c.parentId = ?1 where c.id = ?2")
-    int changeParent(Long newParentId, Long id);
+    @Transactional(rollbackFor = Exception.class)
+    @Query("update Catalog c set c.parentId = ?1, c.gmtModified = ?2 where c.id = ?3")
+    int changeParent(Long newParentId, LocalDateTime dateTime, Long id);
+
+    /**
+     * 目录重命名
+     * @param newName 新名
+     * @param id 目录id
+     * @return 结果
+     */
+    @Modifying
+    @Transactional(rollbackFor = Exception.class)
+    @Query("update Catalog c set c.name = ?1, c.gmtModified = ?2 where c.id = ?3")
+    int rename(String newName, LocalDateTime dateTime, Long id);
 }

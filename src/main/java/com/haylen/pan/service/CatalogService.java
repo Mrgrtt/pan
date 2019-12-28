@@ -31,4 +31,11 @@ public interface CatalogService {
      * @return 移动结果
      */
     int move(Long newParentId, Long id);
+    /**
+     * 目录重命名
+     * @param newName 新名
+     * @param id 目录id
+     * @return 结果
+     */
+    int rename(String newName, Long id);
 }
