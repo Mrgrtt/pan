@@ -94,9 +94,6 @@ public class CatalogServiceImpl implements CatalogService {
     private boolean existed(Long parentId, String name) {
         Catalog catalog = catalogRepository.findCatalogByParentIdAndOwnerIdAndName(
                 parentId, ownerService.getCurrentOwner().getId(), name);
-        if (catalog != null) {
-            return true;
-        }
-        return false;
+        return catalog == null ? false : true;
     }
 }

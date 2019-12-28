@@ -15,4 +15,10 @@ public interface FileRepository extends JpaRepository<File, Long> {
      * @return 文件
      */
     File findFileByCatalogIdAndName(Long catalogId, String name);
+    /**
+     * 根据储存key获取文件
+     * @param storageKey 储存key
+     * @return 文件
+     */
+    File findFileByStorageKey(String storageKey);
 }

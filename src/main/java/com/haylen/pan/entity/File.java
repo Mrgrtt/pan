@@ -29,7 +29,7 @@ public class File {
      */
     @Column(name = "storage_key", columnDefinition = "varchar(64)", nullable = false, unique = true)
     private String storageKey;
-    @Column(name = "media_type", columnDefinition = "varchar(64) default ''")
+    @Column(name = "media_type", columnDefinition = "varchar(128) default ''", nullable = false)
     private String mediaType;
     @Column(name = "gmt_create", columnDefinition = "datetime", nullable = false)
     private LocalDateTime gmtCreate;

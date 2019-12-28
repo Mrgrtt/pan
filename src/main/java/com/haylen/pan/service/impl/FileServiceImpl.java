@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.time.LocalDateTime;
 
 /**
@@ -52,11 +53,19 @@ public class FileServiceImpl implements FileService {
         return fileRepository.save(file);
     }
 
+    @Override
+    public String getFileMediaTypeByStorageKey(String key) {
+        File file = fileRepository.findFileByStorageKey(key);
+        return file == null ? null : file.getMediaType();
+    }
+
+    @Override
+    public InputStream download(String key) {
+        return fileStorageService.getFile(key);
+    }
+
     private boolean existed(Long catalogId, String name) {
         File file = fileRepository.findFileByCatalogIdAndName(catalogId, name);
-        if (file == null) {
-            return false;
-        }
-        return true;
+        return file == null ? false : true;
     }
 }

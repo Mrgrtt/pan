@@ -3,6 +3,8 @@ package com.haylen.pan.service;
 import com.haylen.pan.entity.File;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
+
 /**
  * 文件服务
  * @author haylen
@@ -16,4 +18,18 @@ public interface FileService {
      * @return 文件
      */
     File upload(MultipartFile multipartFile, Long catalogId);
+
+    /**
+     * 根据储存key获取文件的媒体类型
+     * @param key 储存key
+     * @return 媒体类型
+     */
+    String getFileMediaTypeByStorageKey(String key);
+
+    /**
+     * 根据储存key下载文件
+     * @param key 储存key
+     * @return 文件流
+     */
+    InputStream download(String key);
 }
