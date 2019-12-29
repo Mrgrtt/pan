@@ -22,15 +22,6 @@ public interface CatalogRepository extends JpaRepository<Catalog, Long> {
      */
     List<Catalog> findCatalogsByParentIdAndOwnerId(Long parentId, Long ownerId);
     /**
-     * 在指定目录下查找目录
-     * @param parentId 父目录id
-     * @param ownerId 用户id
-     * @param name 要查找的目录名
-     * @return 目录
-     */
-    Catalog findCatalogByParentIdAndOwnerIdAndName(Long parentId, Long ownerId, String name);
-
-    /**
      * 移动目录到相应的父目录
      * @param id 目录id
      * @param newParentId 新的父目录的id

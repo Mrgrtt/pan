@@ -6,6 +6,7 @@ import com.haylen.pan.entity.Owner;
 import com.haylen.pan.repository.OwnerRepository;
 import com.haylen.pan.service.OwnerService;
 import com.haylen.pan.util.JwtUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
  * @date 2019-12-26
  */
 @Service
+@Slf4j
 public class OwnerServiceImpl implements OwnerService {
     @Autowired
     private OwnerRepository ownerRepository;
@@ -42,17 +44,17 @@ public class OwnerServiceImpl implements OwnerService {
 
     @Override
     public Owner register(OwnerParam ownerParam) {
-        //用户名已存在
-        if (ownerRepository.findByUsername(ownerParam.getUsername()) != null) {
-            return null;
-        }
         Owner owner = new Owner();
         owner.setUsername(ownerParam.getUsername());
         String encodedPassword = passwordEncoder.encode(ownerParam.getPassword());
         owner.setPassword(encodedPassword);
         owner.setGmtCreate(LocalDateTime.now());
         owner.setGmtModified(LocalDateTime.now());
-        return ownerRepository.save(owner);
+        try {
+            return ownerRepository.save(owner);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @Override

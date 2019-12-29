@@ -6,6 +6,7 @@ import com.haylen.pan.service.CatalogService;
 import com.haylen.pan.service.FileService;
 import com.haylen.pan.service.FileStorageService;
 import com.haylen.pan.service.OwnerService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,6 +20,7 @@ import java.util.List;
  * @date 2019-12-28
  */
 @Service
+@Slf4j
 public class FileServiceImpl implements FileService {
     @Autowired
     private FileStorageService fileStorageService;
@@ -35,10 +37,6 @@ public class FileServiceImpl implements FileService {
         if (!catalogService.existed(catalogId)) {
             return null;
         }
-        /* 同一目录下是否已存在该文件 */
-        if (existed(catalogId, multipartFile.getOriginalFilename())) {
-            return null;
-        }
         String storageKey = fileStorageService.putFile(multipartFile);
         if (storageKey == null) {
             return null;
@@ -52,7 +50,12 @@ public class FileServiceImpl implements FileService {
         file.setSize(multipartFile.getSize());
         file.setGmtCreate(LocalDateTime.now());
         file.setGmtModified(LocalDateTime.now());
-        return fileRepository.save(file);
+        try {
+            return fileRepository.save(file);
+        } catch (Exception e) {
+            log.info(e.getMessage());
+            return null;
+        }
     }
 
     @Override
@@ -69,10 +72,5 @@ public class FileServiceImpl implements FileService {
     @Override
     public List<File> listFile(Long catalogId) {
         return fileRepository.findFilesByCatalogId(catalogId);
-    }
-
-    private boolean existed(Long catalogId, String name) {
-        File file = fileRepository.findFileByCatalogIdAndName(catalogId, name);
-        return file == null ? false : true;
     }
 }
