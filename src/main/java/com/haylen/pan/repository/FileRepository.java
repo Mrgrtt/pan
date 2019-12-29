@@ -54,4 +54,15 @@ public interface FileRepository extends JpaRepository<File, Long> {
     @Transactional(rollbackFor = Exception.class)
     @Query("update File f set f.catalogId = ?1, f.gmtModified = ?2 where f.id = ?3 and f.ownerId = ?4")
     int move(Long newCatalogId, LocalDateTime time, Long id, Long ownerId);
+
+    /**
+     * 删除文件
+     * @param id 文件id
+     * @param ownerId 用户id
+     * @return 结果
+     */
+    @Modifying
+    @Transactional(rollbackFor = Exception.class)
+    @Query("delete File f where f.id = ?1 and f.ownerId = ?2")
+    int delete(Long id, Long ownerId);
 }

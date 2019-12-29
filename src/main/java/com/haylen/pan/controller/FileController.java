@@ -87,4 +87,12 @@ public class FileController {
         }
         return CommonResult.success("");
     }
+
+    @RequestMapping(value = "/delete/{id}", method = RequestMethod.POST)
+    public CommonResult delete(@PathVariable Long id) {
+        if (fileService.delete(id) <= 0) {
+            return CommonResult.failed();
+        }
+        return CommonResult.success("");
+    }
 }

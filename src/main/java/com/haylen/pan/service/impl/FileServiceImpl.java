@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author haylen
@@ -83,5 +84,18 @@ public class FileServiceImpl implements FileService {
         }
         return fileRepository.move(newCatalogId,
                 LocalDateTime.now(), id, ownerService.getCurrentOwnerId());
+    }
+
+    @Override
+    public int delete(Long id) {
+        Optional<File> optionalFile = fileRepository.findById(id);
+        if (!optionalFile.isPresent()) {
+            return 0;
+        }
+        if (fileRepository.delete(id, ownerService.getCurrentOwnerId()) > 0) {
+            fileStorageService.deleteFile(optionalFile.get().getStorageKey());
+            return 1;
+        }
+        return 0;
     }
 }

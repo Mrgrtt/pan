@@ -56,4 +56,11 @@ public interface FileService {
      * @return 结果
      */
     int move(Long newCatalogId, Long id);
+
+    /**
+     * 删除文件
+     * @param id 文件id
+     * @return 结果
+     */
+    int delete(Long id);
 }
