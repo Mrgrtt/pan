@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * @author haylen
@@ -48,6 +49,7 @@ public class FileServiceImpl implements FileService {
         file.setStorageKey(storageKey);
         file.setName(multipartFile.getOriginalFilename());
         file.setMediaType(multipartFile.getContentType());
+        file.setSize(multipartFile.getSize());
         file.setGmtCreate(LocalDateTime.now());
         file.setGmtModified(LocalDateTime.now());
         return fileRepository.save(file);
@@ -62,6 +64,11 @@ public class FileServiceImpl implements FileService {
     @Override
     public InputStream download(String key) {
         return fileStorageService.getFile(key);
+    }
+
+    @Override
+    public List<File> listFile(Long catalogId) {
+        return fileRepository.findFilesByCatalogId(catalogId);
     }
 
     private boolean existed(Long catalogId, String name) {

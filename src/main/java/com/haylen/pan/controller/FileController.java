@@ -14,6 +14,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 
 /**
  * @author haylen
@@ -63,5 +64,10 @@ public class FileController {
                 .contentLength(length)
                 .contentType(MediaType.valueOf(mediaType))
                 .body(streamingResponseBody);
+    }
+
+    @RequestMapping("/list/{catalogId}")
+    public CommonResult list(@PathVariable Long catalogId) {
+        return CommonResult.success(fileService.listFile(catalogId));
     }
 }

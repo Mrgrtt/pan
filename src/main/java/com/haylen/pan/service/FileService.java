@@ -4,6 +4,7 @@ import com.haylen.pan.entity.File;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
+import java.util.List;
 
 /**
  * 文件服务
@@ -32,4 +33,11 @@ public interface FileService {
      * @return 文件流
      */
     InputStream download(String key);
+
+    /**
+     * 获取指定目录下的文件
+     * @param catalogId 目录id
+     * @return 文件列表
+     */
+    List<File> listFile(Long catalogId);
 }

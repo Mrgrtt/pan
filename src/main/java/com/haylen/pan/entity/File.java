@@ -31,6 +31,8 @@ public class File {
     private String storageKey;
     @Column(name = "media_type", columnDefinition = "varchar(128) default ''", nullable = false)
     private String mediaType;
+    @Column(columnDefinition = "int unsigned", nullable = false)
+    private Long size;
     @Column(name = "gmt_create", columnDefinition = "datetime", nullable = false)
     private LocalDateTime gmtCreate;
     @Column(name = "gmt_modified", columnDefinition = "datetime", nullable = false)
