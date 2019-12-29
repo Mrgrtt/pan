@@ -45,4 +45,11 @@ public interface CatalogService {
      * @return 结果
      */
     boolean notExisted(Long id);
+
+    /**
+     * 删除目录及其子目录和文件
+     * @param id
+     * @return
+     */
+    int delete(Long id);
 }

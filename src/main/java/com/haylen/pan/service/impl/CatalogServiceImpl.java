@@ -1,14 +1,15 @@
 package com.haylen.pan.service.impl;
 
 import com.haylen.pan.entity.Catalog;
+import com.haylen.pan.entity.File;
 import com.haylen.pan.repository.CatalogRepository;
 import com.haylen.pan.service.CatalogService;
+import com.haylen.pan.service.FileService;
 import com.haylen.pan.service.OwnerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -23,6 +24,8 @@ public class CatalogServiceImpl implements CatalogService {
     private CatalogRepository catalogRepository;
     @Autowired
     private OwnerService ownerService;
+    @Autowired
+    private FileService fileService;
 
     @Override
     public Catalog create(Long parentId, String name){
@@ -73,5 +76,24 @@ public class CatalogServiceImpl implements CatalogService {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public int delete(Long id) {
+        Catalog catalog = catalogRepository.findCatalogByIdAndOwnerId(id, ownerService.getCurrentOwnerId());
+        if (catalog == null) {
+            return 0;
+        }
+        List<File> files = fileService.listFile(id);
+        for (File file: files) {
+            fileService.delete(file.getId());
+        }
+        /* 递归删除子目录 */
+        List<Catalog> catalogs = listChildCatalog(id);
+        for (Catalog child: catalogs) {
+            delete(child.getId());
+        }
+        catalogRepository.deleteById(id);
+        return 1;
     }
 }

@@ -52,4 +52,12 @@ public class CatalogController {
         }
         return CommonResult.success("");
     }
+
+    @RequestMapping(value = "/delete/{id}", method = RequestMethod.POST)
+    public CommonResult delete(@PathVariable Long id) {
+        if (catalogService.delete(id) <= 0) {
+            return CommonResult.failed();
+        }
+        return CommonResult.success("");
+    }
 }
