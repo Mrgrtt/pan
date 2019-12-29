@@ -2,6 +2,7 @@ package com.haylen.pan.service;
 
 import com.haylen.pan.bo.OwnerDetails;
 import com.haylen.pan.dto.OwnerParam;
+import com.haylen.pan.dto.PasswordParam;
 import com.haylen.pan.entity.Owner;
 
 /**
@@ -42,4 +43,11 @@ public interface OwnerService {
      * @return 现在登录的用户id
      */
     Long getCurrentOwnerId();
+
+    /**
+     * 改密码
+     * @param passwordParam 密码参数
+     * @return 结果
+     */
+    int updatePassword(PasswordParam passwordParam);
 }

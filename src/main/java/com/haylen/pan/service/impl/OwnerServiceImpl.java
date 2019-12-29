@@ -2,6 +2,7 @@ package com.haylen.pan.service.impl;
 
 import com.haylen.pan.bo.OwnerDetails;
 import com.haylen.pan.dto.OwnerParam;
+import com.haylen.pan.dto.PasswordParam;
 import com.haylen.pan.entity.Owner;
 import com.haylen.pan.repository.OwnerRepository;
 import com.haylen.pan.service.OwnerService;
@@ -65,8 +66,22 @@ public class OwnerServiceImpl implements OwnerService {
 
     @Override
     public Long getCurrentOwnerId() {
+        return getCurrentOwner().getId();
+    }
+
+    private Owner getCurrentOwner(){
         OwnerDetails details = (OwnerDetails) SecurityContextHolder
                 .getContext().getAuthentication().getPrincipal();
-        return details.getOwner().getId();
+        return details.getOwner();
+    }
+
+    @Override
+    public int updatePassword(PasswordParam passwordParam) {
+        String encodeOldPassword = getCurrentOwner().getPassword();
+        if (!passwordEncoder.matches(passwordParam.getOldPassword(), encodeOldPassword)) {
+            return 0;
+        }
+        return ownerRepository.updatePassword(passwordEncoder.encode(passwordParam.getNewPassword()),
+                LocalDateTime.now(), getCurrentOwnerId());
     }
 }
