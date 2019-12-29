@@ -14,7 +14,6 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
 
 /**
  * @author haylen
@@ -69,5 +68,14 @@ public class FileController {
     @RequestMapping("/list/{catalogId}")
     public CommonResult list(@PathVariable Long catalogId) {
         return CommonResult.success(fileService.listFile(catalogId));
+    }
+
+    @RequestMapping(value = "/rename/{id}", method = RequestMethod.POST)
+    public CommonResult rename(@RequestParam(name = "new_name", required = true) String newName,
+                               @PathVariable Long id) {
+        if (fileService.rename(newName, id) == 0) {
+            return CommonResult.failed("重命名文件失败");
+        }
+        return CommonResult.success("", "重命名成功");
     }
 }

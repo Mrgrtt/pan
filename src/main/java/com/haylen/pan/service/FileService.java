@@ -40,4 +40,11 @@ public interface FileService {
      * @return 文件列表
      */
     List<File> listFile(Long catalogId);
+    /**
+     * 重命名文件
+     * @param newName 新名
+     * @param id 文件id
+     * @return 结果
+     */
+    int rename(String newName, Long id);
 }

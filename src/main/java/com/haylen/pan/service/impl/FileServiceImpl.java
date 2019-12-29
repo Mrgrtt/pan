@@ -73,4 +73,14 @@ public class FileServiceImpl implements FileService {
     public List<File> listFile(Long catalogId) {
         return fileRepository.findFilesByCatalogId(catalogId);
     }
+
+    @Override
+    public int rename(String newName, Long id) {
+        try {
+            return fileRepository.rename(newName, id);
+        } catch (Exception e) {
+            log.info(e.getMessage());
+            return 0;
+        }
+    }
 }
