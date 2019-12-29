@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import javax.validation.constraints.NotEmpty;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,13 +27,13 @@ public class FileController {
     private FileService fileService;
 
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
-    public CommonResult upload(@RequestPart(name = "file", required = true) MultipartFile mFile,
-                               @RequestParam(name = "catalog_id", defaultValue = "0") Long catalogId) {
-        File file = fileService.upload(mFile, catalogId);
-        if (file == null) {
-            return CommonResult.failed("文件上传失败");
+    public CommonResult upload(@RequestPart MultipartFile file,
+                               @RequestParam(defaultValue = "0") Long catalogId) {
+        File result = fileService.upload(file, catalogId);
+        if (result == null) {
+            return CommonResult.failed();
         }
-        return CommonResult.success(file, "文件上传成功");
+        return CommonResult.success(result);
     }
 
     @RequestMapping("/download/{key}")
@@ -71,11 +72,19 @@ public class FileController {
     }
 
     @RequestMapping(value = "/rename/{id}", method = RequestMethod.POST)
-    public CommonResult rename(@RequestParam(name = "new_name", required = true) String newName,
+    public CommonResult rename(@RequestParam @NotEmpty String newName,
                                @PathVariable Long id) {
-        if (fileService.rename(newName, id) == 0) {
-            return CommonResult.failed("重命名文件失败");
+        if (fileService.rename(newName, id) <= 0) {
+            return CommonResult.failed();
         }
-        return CommonResult.success("", "重命名成功");
+        return CommonResult.success("");
+    }
+
+    @RequestMapping(value = "/move/{id}", method = RequestMethod.POST)
+    public CommonResult move(@RequestParam Long newCatalogId, @PathVariable Long id) {
+        if (fileService.move(newCatalogId, id) <= 0) {
+            return CommonResult.failed();
+        }
+        return CommonResult.success("");
     }
 }

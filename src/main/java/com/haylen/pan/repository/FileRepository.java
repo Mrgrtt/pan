@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -23,18 +24,34 @@ public interface FileRepository extends JpaRepository<File, Long> {
     /**
      * 获取指定目录下的文件
      * @param catalogId 目录id
+     * @param ownerId 用户id
      * @return 文件列表
      */
-    List<File> findFilesByCatalogId(Long catalogId);
+    List<File> findFilesByCatalogIdAndOwnerId(Long catalogId, Long ownerId);
 
     /**
      * 重命名文件
      * @param newName 新名
+     * @param time 时间
      * @param id 文件id
+     * @param ownerId 用户id
      * @return 结果
      */
     @Modifying
     @Transactional(rollbackFor = Exception.class)
-    @Query("update File f set f.name = ?1 where f.id = ?2")
-    int rename(String newName, Long id);
+    @Query("update File f set f.name = ?1, f.gmtModified = ?2 where f.id = ?3 and f.ownerId = ?4")
+    int rename(String newName, LocalDateTime time, Long id, Long ownerId);
+
+    /**
+     * 移动文件
+     * @param newCatalogId 新目录id
+     * @param time 时间
+     * @param id 文件id
+     * @param ownerId 用户id
+     * @return 结果
+     */
+    @Modifying
+    @Transactional(rollbackFor = Exception.class)
+    @Query("update File f set f.catalogId = ?1, f.gmtModified = ?2 where f.id = ?3 and f.ownerId = ?4")
+    int move(Long newCatalogId, LocalDateTime time, Long id, Long ownerId);
 }

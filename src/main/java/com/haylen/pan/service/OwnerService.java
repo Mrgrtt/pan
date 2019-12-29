@@ -25,7 +25,7 @@ public interface OwnerService {
     /**
      * 注册用户
      * @param ownerParam 注册参数
-     * @return 成功注册用户，失败null.
+     * @return 用户
      */
     Owner register(OwnerParam ownerParam);
 
@@ -38,8 +38,8 @@ public interface OwnerService {
     String login(String username, String password);
 
     /**
-     * 获取现在登录的用户
-     * @return 现在登录的用户
+     * 获取现在登录的用户id
+     * @return 现在登录的用户id
      */
-    Owner getCurrentOwner();
+    Long getCurrentOwnerId();
 }

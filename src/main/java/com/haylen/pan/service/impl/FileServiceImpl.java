@@ -34,7 +34,7 @@ public class FileServiceImpl implements FileService {
     @Override
     public File upload(MultipartFile multipartFile, Long catalogId) {
         /* 该目录是否存在 */
-        if (!catalogService.existed(catalogId)) {
+        if (catalogService.notExisted(catalogId)) {
             return null;
         }
         String storageKey = fileStorageService.putFile(multipartFile);
@@ -43,19 +43,14 @@ public class FileServiceImpl implements FileService {
         }
         File file = new File();
         file.setCatalogId(catalogId);
-        file.setOwnerId(ownerService.getCurrentOwner().getId());
+        file.setOwnerId(ownerService.getCurrentOwnerId());
         file.setStorageKey(storageKey);
         file.setName(multipartFile.getOriginalFilename());
         file.setMediaType(multipartFile.getContentType());
         file.setSize(multipartFile.getSize());
         file.setGmtCreate(LocalDateTime.now());
         file.setGmtModified(LocalDateTime.now());
-        try {
-            return fileRepository.save(file);
-        } catch (Exception e) {
-            log.info(e.getMessage());
-            return null;
-        }
+        return fileRepository.save(file);
     }
 
     @Override
@@ -71,16 +66,22 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public List<File> listFile(Long catalogId) {
-        return fileRepository.findFilesByCatalogId(catalogId);
+        return fileRepository.findFilesByCatalogIdAndOwnerId(
+                catalogId, ownerService.getCurrentOwnerId());
     }
 
     @Override
     public int rename(String newName, Long id) {
-        try {
-            return fileRepository.rename(newName, id);
-        } catch (Exception e) {
-            log.info(e.getMessage());
+        return fileRepository.rename(newName,
+                LocalDateTime.now(), id, ownerService.getCurrentOwnerId());
+    }
+
+    @Override
+    public int move(Long newCatalogId, Long id) {
+        if (catalogService.notExisted(newCatalogId)) {
             return 0;
         }
+        return fileRepository.move(newCatalogId,
+                LocalDateTime.now(), id, ownerService.getCurrentOwnerId());
     }
 }

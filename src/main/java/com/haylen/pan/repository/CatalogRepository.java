@@ -25,12 +25,14 @@ public interface CatalogRepository extends JpaRepository<Catalog, Long> {
      * 移动目录到相应的父目录
      * @param id 目录id
      * @param newParentId 新的父目录的id
+     * @param dateTime 时间
+     * @param ownerId 用户id
      * @return 修改结果
      */
     @Modifying
     @Transactional(rollbackFor = Exception.class)
-    @Query("update Catalog c set c.parentId = ?1, c.gmtModified = ?2 where c.id = ?3")
-    int changeParent(Long newParentId, LocalDateTime dateTime, Long id);
+    @Query("update Catalog c set c.parentId = ?1, c.gmtModified = ?2 where c.id = ?3 and c.ownerId = ?4")
+    int changeParent(Long newParentId, LocalDateTime dateTime, Long id, Long ownerId);
 
     /**
      * 目录重命名
@@ -40,6 +42,14 @@ public interface CatalogRepository extends JpaRepository<Catalog, Long> {
      */
     @Modifying
     @Transactional(rollbackFor = Exception.class)
-    @Query("update Catalog c set c.name = ?1, c.gmtModified = ?2 where c.id = ?3")
-    int rename(String newName, LocalDateTime dateTime, Long id);
+    @Query("update Catalog c set c.name = ?1, c.gmtModified = ?2 where c.id = ?3 and c.ownerId = ?4")
+    int rename(String newName, LocalDateTime dateTime, Long id, Long ownerId);
+
+    /**
+     * 查找目录
+     * @param id 目录id
+     * @param ownerId 用户id
+     * @return
+     */
+    Catalog findCatalogByIdAndOwnerId(Long id, Long ownerId);
 }

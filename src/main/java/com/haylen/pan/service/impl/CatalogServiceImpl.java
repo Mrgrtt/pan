@@ -9,10 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * @author haylen
@@ -27,9 +25,9 @@ public class CatalogServiceImpl implements CatalogService {
     private OwnerService ownerService;
 
     @Override
-    public Catalog create(Long parentId, String name) {
+    public Catalog create(Long parentId, String name){
         /* 父目录是否存在 */
-        if (!existed(parentId)) {
+        if (notExisted(parentId)) {
             return null;
         }
         Catalog catalog = new Catalog();
@@ -37,56 +35,43 @@ public class CatalogServiceImpl implements CatalogService {
         catalog.setGmtCreate(LocalDateTime.now());
         catalog.setGmtModified(LocalDateTime.now());
         catalog.setParentId(parentId);
-        catalog.setOwnerId(ownerService.getCurrentOwner().getId());
-        try {
-            return catalogRepository.save(catalog);
-        } catch (Exception e) {
-            log.info(e.getMessage());
-            return null;
-        }
+        catalog.setOwnerId(ownerService.getCurrentOwnerId());
+        return catalogRepository.save(catalog);
     }
 
     @Override
     public List<Catalog> listChildCatalog(Long id) {
         return catalogRepository.
                 findCatalogsByParentIdAndOwnerId(id,
-                        ownerService.getCurrentOwner().getId());
+                        ownerService.getCurrentOwnerId());
     }
 
     @Override
-    public int move(Long newParentId, Long id) {
+    public int move(Long newParentId, Long id){
         /* 禁止将自身设为其父目录 */
         if (newParentId.equals(id)) {
             return 0;
         }
         /* 该父目录是否存在 */
-        if (!existed(newParentId)) {
+        if (notExisted(newParentId)) {
             return 0;
         }
-        try {
-            return catalogRepository.changeParent(newParentId, LocalDateTime.now(), id);
-        } catch (Exception e) {
-            log.info(e.getMessage());
-            return 0;
-        }
+        return catalogRepository.changeParent(newParentId,
+                LocalDateTime.now(), id, ownerService.getCurrentOwnerId());
     }
 
     @Override
     public int rename(String newName, Long id) {
-        try {
-            return catalogRepository.rename(newName, LocalDateTime.now(), id);
-        } catch (Exception e) {
-            log.info(e.getMessage());
-            return 0;
-        }
+        return catalogRepository.rename(newName,
+                LocalDateTime.now(), id, ownerService.getCurrentOwnerId());
     }
 
     @Override
-    public boolean existed(Long id) {
-        Optional<Catalog> optionalCatalog = catalogRepository.findById(id);
-        if (id !=0 && !optionalCatalog.isPresent()) {
-            return false;
+    public boolean notExisted(Long id) {
+        Catalog catalog = catalogRepository.findCatalogByIdAndOwnerId(id, ownerService.getCurrentOwnerId());
+        if (id !=0 && catalog == null) {
+            return true;
         }
-        return true;
+        return false;
     }
 }

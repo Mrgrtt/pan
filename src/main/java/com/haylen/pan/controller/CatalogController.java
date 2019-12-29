@@ -20,13 +20,13 @@ public class CatalogController {
     private CatalogService catalogService;
 
     @RequestMapping(value = "/create", method = RequestMethod.POST)
-    public CommonResult create(@RequestParam(name = "parent_id", defaultValue = "0") Long parentId,
-                               @NotEmpty @RequestParam String name) {
+    public CommonResult create(@RequestParam(defaultValue = "0") Long parentId,
+                               @RequestParam @NotEmpty String name) {
         Catalog catalog = catalogService.create(parentId, name);
         if (catalog == null) {
-            return CommonResult.failed("创建目录失败");
+            return CommonResult.failed();
         }
-        return CommonResult.success(catalog, "创建目录成功");
+        return CommonResult.success(catalog);
     }
 
     @RequestMapping(value = "/list/{id}")
@@ -35,21 +35,21 @@ public class CatalogController {
         return CommonResult.success(list);
     }
 
-    @RequestMapping(value = "/move", method = RequestMethod.POST)
-    public CommonResult move(@RequestParam(name = "new_parent_id", defaultValue = "0") Long newParentId,
-                             @RequestParam(required = true) Long id) {
+    @RequestMapping(value = "/move/{id}", method = RequestMethod.POST)
+    public CommonResult move(@RequestParam(defaultValue = "0") Long newParentId,
+                             @PathVariable Long id) {
         if (catalogService.move(newParentId, id) <= 0) {
-            return CommonResult.failed("移动目录失败");
+            return CommonResult.failed();
         }
-        return CommonResult.success("", "移动目录成功");
+        return CommonResult.success("");
     }
 
-    @RequestMapping(value = "/rename", method = RequestMethod.POST)
-    public CommonResult rename(@NotEmpty @RequestParam(name = "new_name") String newName,
-                               @RequestParam(required = true) Long id) {
-        if (catalogService.rename(newName, id) == 0) {
-            return CommonResult.failed("重命名失败");
+    @RequestMapping(value = "/rename/{id}", method = RequestMethod.POST)
+    public CommonResult rename(@RequestParam @NotEmpty String newName,
+                               @PathVariable Long id) {
+        if (catalogService.rename(newName, id) <= 0) {
+            return CommonResult.failed();
         }
-        return CommonResult.success("", "重命名目录成功");
+        return CommonResult.success("");
     }
 }

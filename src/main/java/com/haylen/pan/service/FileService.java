@@ -4,6 +4,7 @@ import com.haylen.pan.entity.File;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -47,4 +48,12 @@ public interface FileService {
      * @return 结果
      */
     int rename(String newName, Long id);
+
+    /**
+     * 移动文件
+     * @param newCatalogId 新目录id
+     * @param id 文件id
+     * @return 结果
+     */
+    int move(Long newCatalogId, Long id);
 }

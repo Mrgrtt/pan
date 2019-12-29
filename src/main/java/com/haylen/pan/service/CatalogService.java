@@ -44,5 +44,5 @@ public interface CatalogService {
      * @param id 目录id
      * @return 结果
      */
-    boolean existed(Long id);
+    boolean notExisted(Long id);
 }

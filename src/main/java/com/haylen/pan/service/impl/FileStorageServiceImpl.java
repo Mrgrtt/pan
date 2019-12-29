@@ -30,7 +30,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     @Override
     public String putFile(MultipartFile multipartFile) {
         Path catalogPath = Paths.get(
-                fileStoragePath, ownerService.getCurrentOwner().getId().toString());
+                fileStoragePath, ownerService.getCurrentOwnerId().toString());
         String storageKey = UUID.randomUUID().toString();
         Path filePath = catalogPath.resolve(storageKey);
         try {
@@ -47,7 +47,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     @Override
     public InputStream getFile(String storageKey) {
-        Long ownerId = ownerService.getCurrentOwner().getId();
+        Long ownerId = ownerService.getCurrentOwnerId();
         Path filePath = Paths.get(fileStoragePath, ownerId.toString(), storageKey);
         try {
             return Files.newInputStream(filePath);
