@@ -2,6 +2,7 @@ package com.haylen.pan.component;
 
 import com.haylen.pan.dto.CommonResult;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
@@ -40,6 +41,13 @@ public class GlobalExceptionHandler {
     public CommonResult handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
         log.info("不支持当前请求方法", e);
         return CommonResult.methodNotAllowed();
+    }
+
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+    @ExceptionHandler(DataAccessException.class)
+    public CommonResult handleDataAccessException(DataAccessException e) {
+        log.info("数据库访数据访问异常", e);
+        return CommonResult.validateFailed();
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
