@@ -73,7 +73,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public int rename(String newName, Long id) {
-        return fileRepository.rename(newName,
+        return fileRepository.updateName(newName,
                 LocalDateTime.now(), id, ownerService.getCurrentOwnerId());
     }
 
@@ -82,7 +82,7 @@ public class FileServiceImpl implements FileService {
         if (catalogService.notExisted(newCatalogId)) {
             return 0;
         }
-        return fileRepository.move(newCatalogId,
+        return fileRepository.updateCatalog(newCatalogId,
                 LocalDateTime.now(), id, ownerService.getCurrentOwnerId());
     }
 

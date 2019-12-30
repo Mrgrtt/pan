@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 /**
  * @author haylen
@@ -38,6 +39,7 @@ public class OwnerServiceImpl implements OwnerService {
         if (owner == null) {
             return null;
         }
+        owner.setPassword(null);
         return new OwnerDetails(owner);
     }
 
@@ -46,6 +48,7 @@ public class OwnerServiceImpl implements OwnerService {
         Owner owner = new Owner();
         owner.setUsername(ownerParam.getUsername());
         String encodedPassword = passwordEncoder.encode(ownerParam.getPassword());
+        ownerParam = null;
         owner.setPassword(encodedPassword);
         owner.setGmtCreate(LocalDateTime.now());
         owner.setGmtModified(LocalDateTime.now());
@@ -66,18 +69,18 @@ public class OwnerServiceImpl implements OwnerService {
 
     @Override
     public Long getCurrentOwnerId() {
-        return getCurrentOwner().getId();
-    }
-
-    private Owner getCurrentOwner(){
         OwnerDetails details = (OwnerDetails) SecurityContextHolder
-                .getContext().getAuthentication().getPrincipal();
-        return details.getOwner();
+            .getContext().getAuthentication().getPrincipal();
+        return details.getOwner().getId();
     }
 
     @Override
     public int updatePassword(PasswordParam passwordParam) {
-        String encodeOldPassword = getCurrentOwner().getPassword();
+        Optional<Owner> optionalOwner = ownerRepository.findById(getCurrentOwnerId());
+        if (!optionalOwner.isPresent()) {
+            return 0;
+        }
+        String encodeOldPassword = optionalOwner.get().getPassword();
         if (!passwordEncoder.matches(passwordParam.getOldPassword(), encodeOldPassword)) {
             return 0;
         }

@@ -59,13 +59,13 @@ public class CatalogServiceImpl implements CatalogService {
         if (notExisted(newParentId)) {
             return 0;
         }
-        return catalogRepository.changeParent(newParentId,
+        return catalogRepository.updateParent(newParentId,
                 LocalDateTime.now(), id, ownerService.getCurrentOwnerId());
     }
 
     @Override
     public int rename(String newName, Long id) {
-        return catalogRepository.rename(newName,
+        return catalogRepository.updateName(newName,
                 LocalDateTime.now(), id, ownerService.getCurrentOwnerId());
     }
 

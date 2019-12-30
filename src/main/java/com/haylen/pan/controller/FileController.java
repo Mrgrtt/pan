@@ -77,7 +77,7 @@ public class FileController {
         if (fileService.rename(newName, id) <= 0) {
             return CommonResult.failed();
         }
-        return CommonResult.success("");
+        return CommonResult.success();
     }
 
     @RequestMapping(value = "/move/{id}", method = RequestMethod.POST)
@@ -85,7 +85,7 @@ public class FileController {
         if (fileService.move(newCatalogId, id) <= 0) {
             return CommonResult.failed();
         }
-        return CommonResult.success("");
+        return CommonResult.success();
     }
 
     @RequestMapping(value = "/delete/{id}", method = RequestMethod.POST)
@@ -93,6 +93,6 @@ public class FileController {
         if (fileService.delete(id) <= 0) {
             return CommonResult.failed();
         }
-        return CommonResult.success("");
+        return CommonResult.success();
     }
 }

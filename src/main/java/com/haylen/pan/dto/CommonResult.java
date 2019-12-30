@@ -32,6 +32,13 @@ public class CommonResult<T> {
 
     /**
      * 成功返回结果
+     */
+    public static CommonResult<String> success() {
+        return new CommonResult<>(ResultCode.SUCCESS.getCode(), ResultCode.SUCCESS.getMessage(), "");
+    }
+
+    /**
+     * 成功返回结果
      *
      * @param data 获取的数据
      * @param  message 提示信息
@@ -67,7 +74,7 @@ public class CommonResult<T> {
      * 参数验证失败返回结果
      */
     public static CommonResult<String> validateFailed() {
-        return failed(ResultCode.VALIDATE_FAILED);
+        return validateFailed(ResultCode.BAD_REQUEST.getMessage());
     }
 
     /**
@@ -75,7 +82,30 @@ public class CommonResult<T> {
      * @param message 提示信息
      */
     public static CommonResult<String> validateFailed(String message) {
-        return new CommonResult<>(ResultCode.VALIDATE_FAILED.getCode(), message, "");
+        return new CommonResult<>(ResultCode.BAD_REQUEST.getCode(), message, "");
+    }
+
+    /**
+     * 404
+     * @param message 提示信息
+     */
+    public static CommonResult<String> notFound(String message) {
+        return new CommonResult<>(ResultCode.NOT_FOUND.getCode(), message, "");
+    }
+
+    /**
+     * 404
+     */
+    public static CommonResult<String> notFound() {
+        return notFound(ResultCode.NOT_FOUND.getMessage());
+    }
+
+    /**
+     * 405
+     */
+    public static CommonResult<String> methodNotAllowed() {
+        return new CommonResult<>(ResultCode.METHOD_NOT_ALLOWED.getCode(),
+                ResultCode.METHOD_NOT_ALLOWED.getMessage(), "");
     }
 
     /**

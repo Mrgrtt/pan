@@ -40,7 +40,7 @@ public interface FileRepository extends JpaRepository<File, Long> {
     @Modifying
     @Transactional(rollbackFor = Exception.class)
     @Query("update File f set f.name = ?1, f.gmtModified = ?2 where f.id = ?3 and f.ownerId = ?4")
-    int rename(String newName, LocalDateTime time, Long id, Long ownerId);
+    int updateName(String newName, LocalDateTime time, Long id, Long ownerId);
 
     /**
      * 移动文件
@@ -53,7 +53,7 @@ public interface FileRepository extends JpaRepository<File, Long> {
     @Modifying
     @Transactional(rollbackFor = Exception.class)
     @Query("update File f set f.catalogId = ?1, f.gmtModified = ?2 where f.id = ?3 and f.ownerId = ?4")
-    int move(Long newCatalogId, LocalDateTime time, Long id, Long ownerId);
+    int updateCatalog(Long newCatalogId, LocalDateTime time, Long id, Long ownerId);
 
     /**
      * 删除文件
@@ -63,6 +63,6 @@ public interface FileRepository extends JpaRepository<File, Long> {
      */
     @Modifying
     @Transactional(rollbackFor = Exception.class)
-    @Query("delete File f where f.id = ?1 and f.ownerId = ?2")
+    @Query("delete from File f where f.id = ?1 and f.ownerId = ?2")
     int delete(Long id, Long ownerId);
 }

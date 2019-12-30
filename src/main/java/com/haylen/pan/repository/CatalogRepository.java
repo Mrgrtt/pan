@@ -32,24 +32,26 @@ public interface CatalogRepository extends JpaRepository<Catalog, Long> {
     @Modifying
     @Transactional(rollbackFor = Exception.class)
     @Query("update Catalog c set c.parentId = ?1, c.gmtModified = ?2 where c.id = ?3 and c.ownerId = ?4")
-    int changeParent(Long newParentId, LocalDateTime dateTime, Long id, Long ownerId);
+    int updateParent(Long newParentId, LocalDateTime dateTime, Long id, Long ownerId);
 
     /**
      * 目录重命名
      * @param newName 新名
+     * @param dateTime 时间
      * @param id 目录id
+     * @param ownerId 用户id
      * @return 结果
      */
     @Modifying
     @Transactional(rollbackFor = Exception.class)
     @Query("update Catalog c set c.name = ?1, c.gmtModified = ?2 where c.id = ?3 and c.ownerId = ?4")
-    int rename(String newName, LocalDateTime dateTime, Long id, Long ownerId);
+    int updateName(String newName, LocalDateTime dateTime, Long id, Long ownerId);
 
     /**
      * 查找目录
      * @param id 目录id
      * @param ownerId 用户id
-     * @return
+     * @return 结果
      */
     Catalog findCatalogByIdAndOwnerId(Long id, Long ownerId);
 }

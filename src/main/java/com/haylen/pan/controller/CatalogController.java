@@ -41,7 +41,7 @@ public class CatalogController {
         if (catalogService.move(newParentId, id) <= 0) {
             return CommonResult.failed();
         }
-        return CommonResult.success("");
+        return CommonResult.success();
     }
 
     @RequestMapping(value = "/rename/{id}", method = RequestMethod.POST)
@@ -50,7 +50,7 @@ public class CatalogController {
         if (catalogService.rename(newName, id) <= 0) {
             return CommonResult.failed();
         }
-        return CommonResult.success("");
+        return CommonResult.success();
     }
 
     @RequestMapping(value = "/delete/{id}", method = RequestMethod.POST)
@@ -58,6 +58,6 @@ public class CatalogController {
         if (catalogService.delete(id) <= 0) {
             return CommonResult.failed();
         }
-        return CommonResult.success("");
+        return CommonResult.success();
     }
 }
