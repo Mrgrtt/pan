@@ -7,6 +7,7 @@ import com.haylen.pan.service.OwnerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -43,6 +44,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/owner/register*", "/owner/login*")
                 .permitAll()
+                .antMatchers(HttpMethod.OPTIONS)
+                .permitAll()
                 .anyRequest()
                 .authenticated();
         http.headers().cacheControl().disable();
@@ -50,6 +53,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.exceptionHandling()
                 .accessDeniedHandler(restfulAccessDeniedHandler())
                 .authenticationEntryPoint(restAuthenticationEntryPoint());
+        http.cors();
     }
 
     @Override

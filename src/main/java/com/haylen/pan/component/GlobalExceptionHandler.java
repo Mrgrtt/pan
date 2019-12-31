@@ -43,7 +43,7 @@ public class GlobalExceptionHandler {
         return CommonResult.methodNotAllowed();
     }
 
-    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(DataAccessException.class)
     public CommonResult handleDataAccessException(DataAccessException e) {
         log.info("数据库访数据访问异常", e);

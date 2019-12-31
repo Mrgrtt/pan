@@ -9,7 +9,7 @@ public enum ResultCode {
     FAILED(500, "操作失败"),
     NOT_FOUND(404, "访问地址不存在"),
     UNAUTHORIZED(401, "暂未登录或token已经过期"),
-    BAD_REQUEST(407, "参数解析失败"),
+    BAD_REQUEST(400, "参数解析失败"),
     METHOD_NOT_ALLOWED(405, "不支持当前请求方法"),
     FORBIDDEN(403, "没有相关权限");
     private Integer code;
