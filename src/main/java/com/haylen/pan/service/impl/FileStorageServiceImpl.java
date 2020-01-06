@@ -1,5 +1,7 @@
 package com.haylen.pan.service.impl;
 
+import com.haylen.pan.entity.File;
+import com.haylen.pan.service.FileService;
 import com.haylen.pan.service.FileStorageService;
 import com.haylen.pan.service.OwnerService;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +28,8 @@ public class FileStorageServiceImpl implements FileStorageService {
     private String fileStoragePath;
     @Autowired
     private OwnerService ownerService;
+    @Autowired
+    private FileService fileService;
 
     @Override
     public String putFile(MultipartFile multipartFile) {
@@ -47,8 +51,11 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     @Override
     public InputStream getFile(String storageKey) {
-        Long ownerId = ownerService.getCurrentOwnerId();
-        Path filePath = Paths.get(fileStoragePath, ownerId.toString(), storageKey);
+        File file = fileService.getFileByStorageKey(storageKey);
+        if (file == null) {
+            return null;
+        }
+        Path filePath = Paths.get(fileStoragePath, file.getOwnerId().toString(), storageKey);
         try {
             return Files.newInputStream(filePath);
         } catch (IOException e) {

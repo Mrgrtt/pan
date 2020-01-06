@@ -4,6 +4,7 @@ import com.haylen.pan.dto.CommonResult;
 import com.haylen.pan.entity.File;
 import com.haylen.pan.service.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,10 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import javax.validation.constraints.NotEmpty;
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 
 /**
  * @author haylen
@@ -37,32 +35,57 @@ public class FileController {
     }
 
     @RequestMapping("/download/{key}")
-    public ResponseEntity<StreamingResponseBody> download(@PathVariable String key) {
+    public ResponseEntity<StreamingResponseBody> download(@PathVariable String key,
+                        @RequestHeader(name = "Range", required = false) String rangeHeader) {
         InputStream inputStream = fileService.download(key);
-        String mediaType = fileService.getFileMediaTypeByStorageKey(key);
-        long length = 0;
+        File file = fileService.getFileByStorageKey(key);
+        long fileLength = 0;
         if (inputStream == null) {
             return ResponseEntity.badRequest().build();
         }
         try {
-            length = inputStream.available();
+            fileLength = inputStream.available();
         } catch (IOException e) {
             return ResponseEntity.badRequest().build();
         }
+        long rangeStart = 0;
+        long rangeEnd = fileLength;
+        if (rangeHeader != null) {
+            //example: bytes=0-1023 表示从0取到1023，长度为1024
+            String[] ranges = rangeHeader.substring("bytes=".length()).split("-");
+            rangeStart = Long.parseLong(ranges[0]);
+            if (ranges.length > 1) {
+                rangeEnd = Long.parseLong(ranges[1]) + 1;
+            }
+        }
+        final long skip = rangeStart;
+        final long contentLength = rangeEnd - rangeStart;
         StreamingResponseBody streamingResponseBody = new StreamingResponseBody() {
             @Override
             public void writeTo(OutputStream outputStream) throws IOException {
                 BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+                bufferedInputStream.skip(skip);
                 byte[] bytes = new byte[1024];
-                while (bufferedInputStream.read(bytes) != -1) {
-                    outputStream.write(bytes);
+                long readSum = 0;
+                int readCount = 0;
+                while ((readCount = bufferedInputStream.read(bytes)) != -1) {
+                    if (readSum + readCount > contentLength) {
+                        outputStream.write(bytes, 0, (int) (contentLength - readSum));
+                    } else {
+                        outputStream.write(bytes, 0, readCount);
+                    }
+                    readSum = readSum + readCount;
                 }
                 outputStream.flush();
             }
         };
-        return ResponseEntity.ok()
-                .contentLength(length)
-                .contentType(MediaType.valueOf(mediaType))
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Accept-Ranges", "bytes");
+        headers.add("Content-Range", "bytes " + rangeStart + "-" + (rangeEnd - 1) + "/" + fileLength);
+        return ResponseEntity.status(206)
+                .contentLength(contentLength)
+                .contentType(MediaType.valueOf(file.getMediaType()))
+                .headers(headers)
                 .body(streamingResponseBody);
     }
 

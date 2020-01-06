@@ -22,11 +22,11 @@ public interface FileService {
     File upload(MultipartFile multipartFile, Long catalogId);
 
     /**
-     * 根据储存key获取文件的媒体类型
+     * 根据储存key获取文件
      * @param key 储存key
-     * @return 媒体类型
+     * @return 文件
      */
-    String getFileMediaTypeByStorageKey(String key);
+    File getFileByStorageKey(String key);
 
     /**
      * 根据储存key下载文件

@@ -55,9 +55,8 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public String getFileMediaTypeByStorageKey(String key) {
-        File file = fileRepository.findFileByStorageKey(key);
-        return file == null ? null : file.getMediaType();
+    public File getFileByStorageKey(String key) {
+        return fileRepository.findFileByStorageKey(key);
     }
 
     @Override
