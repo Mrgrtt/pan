@@ -13,11 +13,7 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 @Table(name = "catalog")
-public class Catalog {
-    @Id
-    @GeneratedValue
-    @Column(columnDefinition = "bigint unsigned")
-    private Long id;
+public class Catalog extends BaseEntity{
     @Column(name = "owner_id", columnDefinition = "bigint unsigned", nullable = false)
     private Long ownerId;
     /**
@@ -27,8 +23,4 @@ public class Catalog {
     private Long parentId;
     @Column(name = "name", columnDefinition = "varchar(64)", nullable = false)
     private String name;
-    @Column(name = "gmt_create", columnDefinition = "datetime", nullable = false)
-    private LocalDateTime gmtCreate;
-    @Column(name = "gmt_modified", columnDefinition = "datetime", nullable = false)
-    private LocalDateTime gmtModified;
 }

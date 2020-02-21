@@ -50,7 +50,6 @@ public class OwnerServiceImpl implements OwnerService {
         String encodedPassword = passwordEncoder.encode(ownerParam.getPassword());
         ownerParam = null;
         owner.setPassword(encodedPassword);
-        owner.setGmtCreate(LocalDateTime.now());
         owner.setGmtModified(LocalDateTime.now());
         return ownerRepository.save(owner);
     }

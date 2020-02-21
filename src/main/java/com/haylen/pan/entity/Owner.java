@@ -12,17 +12,13 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 @Table(name = "owner")
-public class Owner {
-    @Id
-    @GeneratedValue
-    @Column(columnDefinition = "bigint unsigned")
-    private Long id;
+public class Owner extends BaseEntity{
     @Column(name = "username", columnDefinition = "varchar(64)", nullable = false, unique = true)
     private String username;
+
+    /**
+     * 加密后的密码
+     */
     @Column(name = "password", columnDefinition = "char(64)", nullable = false)
     private String password;
-    @Column(name = "gmt_create", columnDefinition = "datetime", nullable = false)
-    private LocalDateTime gmtCreate;
-    @Column(name = "gmt_modified", columnDefinition = "datetime", nullable = false)
-    private LocalDateTime gmtModified;
 }

@@ -35,7 +35,6 @@ public class CatalogServiceImpl implements CatalogService {
         }
         Catalog catalog = new Catalog();
         catalog.setName(name);
-        catalog.setGmtCreate(LocalDateTime.now());
         catalog.setGmtModified(LocalDateTime.now());
         catalog.setParentId(parentId);
         catalog.setOwnerId(ownerService.getCurrentOwnerId());

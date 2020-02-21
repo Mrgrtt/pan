@@ -13,6 +13,9 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 
 import javax.validation.constraints.NotEmpty;
 import java.io.*;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author haylen
@@ -36,15 +39,17 @@ public class FileController {
 
     @RequestMapping("/download/{key}")
     public ResponseEntity<StreamingResponseBody> download(@PathVariable String key,
-                        @RequestHeader(name = "Range", required = false) String rangeHeader) {
+                        @RequestHeader(name = "Range", required = false) String rangeHeader){
         InputStream inputStream = fileService.download(key);
         File file = fileService.getFileByStorageKey(key);
         long fileLength = 0;
+        String encodeFilename;
         if (inputStream == null) {
             return ResponseEntity.badRequest().build();
         }
         try {
             fileLength = inputStream.available();
+            encodeFilename = URLEncoder.encode(file.getName(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             return ResponseEntity.badRequest().build();
         }
@@ -82,6 +87,8 @@ public class FileController {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Accept-Ranges", "bytes");
         headers.add("Content-Range", "bytes " + rangeStart + "-" + (rangeEnd - 1) + "/" + fileLength);
+        headers.add("Content-Disposition",
+                "attachment; filename=" + encodeFilename);
         return ResponseEntity.status(206)
                 .contentLength(contentLength)
                 .contentType(MediaType.valueOf(file.getMediaType()))

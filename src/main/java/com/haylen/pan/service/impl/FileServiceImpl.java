@@ -49,7 +49,6 @@ public class FileServiceImpl implements FileService {
         file.setName(multipartFile.getOriginalFilename());
         file.setMediaType(multipartFile.getContentType());
         file.setSize(multipartFile.getSize());
-        file.setGmtCreate(LocalDateTime.now());
         file.setGmtModified(LocalDateTime.now());
         return fileRepository.save(file);
     }
