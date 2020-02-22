@@ -16,10 +16,10 @@ public interface FileService {
     /**
      * 上传文件
      * @param multipartFile 文件
-     * @param catalogId 上传到的目录id
+     * @param folderId 上传到的目录id
      * @return 文件
      */
-    File upload(MultipartFile multipartFile, Long catalogId);
+    File upload(MultipartFile multipartFile, Long folderId);
 
     /**
      * 根据储存key获取文件
@@ -37,10 +37,10 @@ public interface FileService {
 
     /**
      * 获取指定目录下的文件
-     * @param catalogId 目录id
+     * @param folderId 目录id
      * @return 文件列表
      */
-    List<File> listFile(Long catalogId);
+    List<File> listFile(Long folderId);
     /**
      * 重命名文件
      * @param newName 新名
@@ -51,11 +51,11 @@ public interface FileService {
 
     /**
      * 移动文件
-     * @param newCatalogId 新目录id
+     * @param newFolderId 新目录id
      * @param id 文件id
      * @return 结果
      */
-    int move(Long newCatalogId, Long id);
+    int move(Long newFolderId, Long id);
 
     /**
      * 删除文件

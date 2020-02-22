@@ -29,8 +29,8 @@ public class FileController {
 
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
     public CommonResult upload(@RequestPart MultipartFile file,
-                               @RequestParam(defaultValue = "0") Long catalogId) {
-        File result = fileService.upload(file, catalogId);
+                               @RequestParam(defaultValue = "0") Long folderId) {
+        File result = fileService.upload(file, folderId);
         if (result == null) {
             return CommonResult.failed();
         }
@@ -96,9 +96,9 @@ public class FileController {
                 .body(streamingResponseBody);
     }
 
-    @RequestMapping("/list/{catalogId}")
-    public CommonResult list(@PathVariable Long catalogId) {
-        return CommonResult.success(fileService.listFile(catalogId));
+    @RequestMapping("/list/{folderId}")
+    public CommonResult list(@PathVariable Long folderId) {
+        return CommonResult.success(fileService.listFile(folderId));
     }
 
     @RequestMapping(value = "/rename/{id}", method = RequestMethod.POST)
@@ -111,8 +111,8 @@ public class FileController {
     }
 
     @RequestMapping(value = "/move/{id}", method = RequestMethod.POST)
-    public CommonResult move(@RequestParam Long newCatalogId, @PathVariable Long id) {
-        if (fileService.move(newCatalogId, id) <= 0) {
+    public CommonResult move(@RequestParam Long newFolderId, @PathVariable Long id) {
+        if (fileService.move(newFolderId, id) <= 0) {
             return CommonResult.failed();
         }
         return CommonResult.success();

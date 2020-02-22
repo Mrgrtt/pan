@@ -14,8 +14,11 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "file")
 public class File extends BaseEntity {
-    @Column(name = "catalog_id", columnDefinition = "bigint unsigned default 0")
-    private Long catalogId;
+    /**
+     * 文件夹Id 默认为0，表示位于根目录
+     */
+    @Column(name = "folder_id", columnDefinition = "bigint unsigned default 0")
+    private Long folderId;
 
     @Column(name = "owner_id", columnDefinition = "bigint unsigned", nullable = false)
     private Long ownerId;

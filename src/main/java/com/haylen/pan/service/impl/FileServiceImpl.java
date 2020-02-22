@@ -2,7 +2,7 @@ package com.haylen.pan.service.impl;
 
 import com.haylen.pan.entity.File;
 import com.haylen.pan.repository.FileRepository;
-import com.haylen.pan.service.CatalogService;
+import com.haylen.pan.service.FolderService;
 import com.haylen.pan.service.FileService;
 import com.haylen.pan.service.FileStorageService;
 import com.haylen.pan.service.OwnerService;
@@ -30,12 +30,12 @@ public class FileServiceImpl implements FileService {
     @Autowired
     private FileRepository fileRepository;
     @Autowired
-    private CatalogService catalogService;
+    private FolderService folderService;
 
     @Override
-    public File upload(MultipartFile multipartFile, Long catalogId) {
+    public File upload(MultipartFile multipartFile, Long folderId) {
         /* 该目录是否存在 */
-        if (catalogService.notExisted(catalogId)) {
+        if (folderService.notExisted(folderId)) {
             return null;
         }
         String storageKey = fileStorageService.putFile(multipartFile);
@@ -43,7 +43,7 @@ public class FileServiceImpl implements FileService {
             return null;
         }
         File file = new File();
-        file.setCatalogId(catalogId);
+        file.setFolderId(folderId);
         file.setOwnerId(ownerService.getCurrentOwnerId());
         file.setStorageKey(storageKey);
         file.setName(multipartFile.getOriginalFilename());
@@ -64,9 +64,9 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public List<File> listFile(Long catalogId) {
-        return fileRepository.findFilesByCatalogIdAndOwnerId(
-                catalogId, ownerService.getCurrentOwnerId());
+    public List<File> listFile(Long folderId) {
+        return fileRepository.findFilesByFolderIdAndOwnerId(
+                folderId, ownerService.getCurrentOwnerId());
     }
 
     @Override
@@ -76,11 +76,11 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public int move(Long newCatalogId, Long id) {
-        if (catalogService.notExisted(newCatalogId)) {
+    public int move(Long newFolderId, Long id) {
+        if (folderService.notExisted(newFolderId)) {
             return 0;
         }
-        return fileRepository.updateCatalog(newCatalogId,
+        return fileRepository.updateFolder(newFolderId,
                 LocalDateTime.now(), id, ownerService.getCurrentOwnerId());
     }
 

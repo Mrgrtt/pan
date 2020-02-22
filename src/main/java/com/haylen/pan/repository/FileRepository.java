@@ -23,11 +23,11 @@ public interface FileRepository extends JpaRepository<File, Long> {
 
     /**
      * 获取指定目录下的文件
-     * @param catalogId 目录id
+     * @param folderId 目录id
      * @param ownerId 用户id
      * @return 文件列表
      */
-    List<File> findFilesByCatalogIdAndOwnerId(Long catalogId, Long ownerId);
+    List<File> findFilesByFolderIdAndOwnerId(Long folderId, Long ownerId);
 
     /**
      * 重命名文件
@@ -44,7 +44,7 @@ public interface FileRepository extends JpaRepository<File, Long> {
 
     /**
      * 移动文件
-     * @param newCatalogId 新目录id
+     * @param newFolderId 新目录id
      * @param time 时间
      * @param id 文件id
      * @param ownerId 用户id
@@ -52,8 +52,8 @@ public interface FileRepository extends JpaRepository<File, Long> {
      */
     @Modifying
     @Transactional(rollbackFor = Exception.class)
-    @Query("update File f set f.catalogId = ?1, f.gmtModified = ?2 where f.id = ?3 and f.ownerId = ?4")
-    int updateCatalog(Long newCatalogId, LocalDateTime time, Long id, Long ownerId);
+    @Query("update File f set f.folderId = ?1, f.gmtModified = ?2 where f.id = ?3 and f.ownerId = ?4")
+    int updateFolder(Long newFolderId, LocalDateTime time, Long id, Long ownerId);
 
     /**
      * 删除文件

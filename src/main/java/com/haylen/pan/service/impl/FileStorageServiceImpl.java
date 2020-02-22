@@ -33,13 +33,13 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     @Override
     public String putFile(MultipartFile multipartFile) {
-        Path catalogPath = Paths.get(
+        Path folderPath = Paths.get(
                 fileStoragePath, ownerService.getCurrentOwnerId().toString());
         String storageKey = UUID.randomUUID().toString();
-        Path filePath = catalogPath.resolve(storageKey);
+        Path filePath = folderPath.resolve(storageKey);
         try {
-            if (Files.notExists(catalogPath)) {
-                Files.createDirectory(catalogPath);
+            if (Files.notExists(folderPath)) {
+                Files.createDirectory(folderPath);
             }
             multipartFile.transferTo(filePath);
         } catch (IOException e) {

@@ -1,8 +1,8 @@
 package com.haylen.pan.controller;
 
 import com.haylen.pan.dto.CommonResult;
-import com.haylen.pan.entity.Catalog;
-import com.haylen.pan.service.CatalogService;
+import com.haylen.pan.entity.Folder;
+import com.haylen.pan.service.FolderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,31 +14,31 @@ import java.util.List;
  * @date 2019-12-27
  */
 @RestController
-@RequestMapping("/catalog")
-public class CatalogController {
+@RequestMapping("/folder")
+public class FolderController {
     @Autowired
-    private CatalogService catalogService;
+    private FolderService folderService;
 
     @RequestMapping(value = "/create", method = RequestMethod.POST)
     public CommonResult create(@RequestParam(defaultValue = "0") Long parentId,
                                @RequestParam @NotEmpty String name) {
-        Catalog catalog = catalogService.create(parentId, name);
-        if (catalog == null) {
+        Folder folder = folderService.create(parentId, name);
+        if (folder == null) {
             return CommonResult.failed();
         }
-        return CommonResult.success(catalog);
+        return CommonResult.success(folder);
     }
 
     @RequestMapping(value = "/list/{id}")
     public CommonResult list(@PathVariable Long id) {
-        List<Catalog> list = catalogService.listChildCatalog(id);
+        List<Folder> list = folderService.listChildFolder(id);
         return CommonResult.success(list);
     }
 
     @RequestMapping(value = "/move/{id}", method = RequestMethod.POST)
     public CommonResult move(@RequestParam(defaultValue = "0") Long newParentId,
                              @PathVariable Long id) {
-        if (catalogService.move(newParentId, id) <= 0) {
+        if (folderService.move(newParentId, id) <= 0) {
             return CommonResult.failed();
         }
         return CommonResult.success();
@@ -47,7 +47,7 @@ public class CatalogController {
     @RequestMapping(value = "/rename/{id}", method = RequestMethod.POST)
     public CommonResult rename(@RequestParam @NotEmpty String newName,
                                @PathVariable Long id) {
-        if (catalogService.rename(newName, id) <= 0) {
+        if (folderService.rename(newName, id) <= 0) {
             return CommonResult.failed();
         }
         return CommonResult.success();
@@ -55,7 +55,7 @@ public class CatalogController {
 
     @RequestMapping(value = "/delete/{id}", method = RequestMethod.POST)
     public CommonResult delete(@PathVariable Long id) {
-        if (catalogService.delete(id) <= 0) {
+        if (folderService.delete(id) <= 0) {
             return CommonResult.failed();
         }
         return CommonResult.success();

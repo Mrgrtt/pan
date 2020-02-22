@@ -1,9 +1,9 @@
 package com.haylen.pan.service.impl;
 
-import com.haylen.pan.entity.Catalog;
+import com.haylen.pan.entity.Folder;
 import com.haylen.pan.entity.File;
-import com.haylen.pan.repository.CatalogRepository;
-import com.haylen.pan.service.CatalogService;
+import com.haylen.pan.repository.FolderRepository;
+import com.haylen.pan.service.FolderService;
 import com.haylen.pan.service.FileService;
 import com.haylen.pan.service.OwnerService;
 import lombok.extern.slf4j.Slf4j;
@@ -19,32 +19,32 @@ import java.util.List;
  */
 @Service
 @Slf4j
-public class CatalogServiceImpl implements CatalogService {
+public class FolderServiceImpl implements FolderService {
     @Autowired
-    private CatalogRepository catalogRepository;
+    private FolderRepository folderRepository;
     @Autowired
     private OwnerService ownerService;
     @Autowired
     private FileService fileService;
 
     @Override
-    public Catalog create(Long parentId, String name){
+    public Folder create(Long parentId, String name){
         /* 父目录是否存在 */
         if (notExisted(parentId)) {
             return null;
         }
-        Catalog catalog = new Catalog();
-        catalog.setName(name);
-        catalog.setGmtModified(LocalDateTime.now());
-        catalog.setParentId(parentId);
-        catalog.setOwnerId(ownerService.getCurrentOwnerId());
-        return catalogRepository.save(catalog);
+        Folder folder = new Folder();
+        folder.setName(name);
+        folder.setGmtModified(LocalDateTime.now());
+        folder.setParentId(parentId);
+        folder.setOwnerId(ownerService.getCurrentOwnerId());
+        return folderRepository.save(folder);
     }
 
     @Override
-    public List<Catalog> listChildCatalog(Long id) {
-        return catalogRepository.
-                findCatalogsByParentIdAndOwnerId(id,
+    public List<Folder> listChildFolder(Long id) {
+        return folderRepository.
+                findFoldersByParentIdAndOwnerId(id,
                         ownerService.getCurrentOwnerId());
     }
 
@@ -58,20 +58,20 @@ public class CatalogServiceImpl implements CatalogService {
         if (notExisted(newParentId)) {
             return 0;
         }
-        return catalogRepository.updateParent(newParentId,
+        return folderRepository.updateParent(newParentId,
                 LocalDateTime.now(), id, ownerService.getCurrentOwnerId());
     }
 
     @Override
     public int rename(String newName, Long id) {
-        return catalogRepository.updateName(newName,
+        return folderRepository.updateName(newName,
                 LocalDateTime.now(), id, ownerService.getCurrentOwnerId());
     }
 
     @Override
     public boolean notExisted(Long id) {
-        Catalog catalog = catalogRepository.findCatalogByIdAndOwnerId(id, ownerService.getCurrentOwnerId());
-        if (id !=0 && catalog == null) {
+        Folder folder = folderRepository.findFolderByIdAndOwnerId(id, ownerService.getCurrentOwnerId());
+        if (id !=0 && folder == null) {
             return true;
         }
         return false;
@@ -79,8 +79,8 @@ public class CatalogServiceImpl implements CatalogService {
 
     @Override
     public int delete(Long id) {
-        Catalog catalog = catalogRepository.findCatalogByIdAndOwnerId(id, ownerService.getCurrentOwnerId());
-        if (catalog == null) {
+        Folder folder = folderRepository.findFolderByIdAndOwnerId(id, ownerService.getCurrentOwnerId());
+        if (folder == null) {
             return 0;
         }
         List<File> files = fileService.listFile(id);
@@ -88,11 +88,11 @@ public class CatalogServiceImpl implements CatalogService {
             fileService.delete(file.getId());
         }
         /* 递归删除子目录 */
-        List<Catalog> catalogs = listChildCatalog(id);
-        for (Catalog child: catalogs) {
+        List<Folder> folders = listChildFolder(id);
+        for (Folder child: folders) {
             delete(child.getId());
         }
-        catalogRepository.deleteById(id);
+        folderRepository.deleteById(id);
         return 1;
     }
 }
