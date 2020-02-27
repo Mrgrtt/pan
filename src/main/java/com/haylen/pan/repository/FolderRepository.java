@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author haylen
@@ -15,19 +16,12 @@ import java.util.List;
  */
 public interface FolderRepository extends JpaRepository<Folder, Long> {
     /**
-     * 获取指定目录的子目录
-     * @param parentId 父目录id
-     * @param ownerId 用户id
-     * @return 子目录
+     * 获取指定目录的子文件夹
      */
     List<Folder> findFoldersByParentIdAndOwnerId(Long parentId, Long ownerId);
+
     /**
-     * 移动目录到相应的父目录
-     * @param id 目录id
-     * @param newParentId 新的父目录的id
-     * @param dateTime 时间
-     * @param ownerId 用户id
-     * @return 修改结果
+     * 更改父文件夹
      */
     @Modifying
     @Transactional(rollbackFor = Exception.class)
@@ -35,12 +29,7 @@ public interface FolderRepository extends JpaRepository<Folder, Long> {
     int updateParent(Long newParentId, LocalDateTime dateTime, Long id, Long ownerId);
 
     /**
-     * 目录重命名
-     * @param newName 新名
-     * @param dateTime 时间
-     * @param id 目录id
-     * @param ownerId 用户id
-     * @return 结果
+     * 重命名
      */
     @Modifying
     @Transactional(rollbackFor = Exception.class)
@@ -48,10 +37,12 @@ public interface FolderRepository extends JpaRepository<Folder, Long> {
     int updateName(String newName, LocalDateTime dateTime, Long id, Long ownerId);
 
     /**
-     * 查找目录
-     * @param id 目录id
-     * @param ownerId 用户id
-     * @return 结果
+     * 查找文件夹通过id
      */
-    Folder findFolderByIdAndOwnerId(Long id, Long ownerId);
+    Optional<Folder> findFolderByIdAndOwnerId(Long id, Long ownerId);
+
+    /**
+     * 是否存在该名字的子文件夹
+     */
+    Optional<Folder> findFolderByParentIdAndOwnerIdAndName(Long parentId, Long ownerId, String name);
 }

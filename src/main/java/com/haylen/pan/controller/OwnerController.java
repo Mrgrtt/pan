@@ -3,6 +3,7 @@ package com.haylen.pan.controller;
 import com.haylen.pan.dto.CommonResult;
 import com.haylen.pan.dto.OwnerParam;
 import com.haylen.pan.dto.PasswordParam;
+import com.haylen.pan.entity.Owner;
 import com.haylen.pan.service.OwnerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,9 @@ public class OwnerController {
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     public CommonResult register(@Valid @RequestBody OwnerParam ownerParam) {
-        ownerService.register(ownerParam);
+        if (ownerService.register(ownerParam) == null) {
+            return CommonResult.failed();
+        }
         return CommonResult.success();
     }
 
@@ -42,5 +45,10 @@ public class OwnerController {
             return CommonResult.failed();
         }
         return CommonResult.success();
+    }
+
+    @RequestMapping("/isRegistered")
+    public CommonResult isRegistered(@RequestParam @NotEmpty String username) {
+        return CommonResult.success(ownerService.isRegistered(username));
     }
 }

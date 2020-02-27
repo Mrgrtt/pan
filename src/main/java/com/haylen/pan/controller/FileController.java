@@ -14,7 +14,6 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 import javax.validation.constraints.NotEmpty;
 import java.io.*;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -124,5 +123,10 @@ public class FileController {
             return CommonResult.failed();
         }
         return CommonResult.success();
+    }
+
+    @RequestMapping("/existed")
+    public CommonResult existed(@RequestParam Long folderId, @RequestParam @NotEmpty String name) {
+        return CommonResult.success(fileService.isExisted(folderId, name));
     }
 }

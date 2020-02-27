@@ -1,6 +1,7 @@
 package com.haylen.pan.entity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
  * @date 2019-12-25
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "owner")
 public class Owner extends BaseEntity{

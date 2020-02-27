@@ -55,9 +55,13 @@ public class FolderController {
 
     @RequestMapping(value = "/delete/{id}", method = RequestMethod.POST)
     public CommonResult delete(@PathVariable Long id) {
-        if (folderService.delete(id) <= 0) {
-            return CommonResult.failed();
-        }
+        folderService.delete(id);
         return CommonResult.success();
+    }
+
+    @RequestMapping("/existedChildFolder/{id}")
+    public CommonResult existedChildFolder(@PathVariable Long id,
+                                           @RequestParam @NotEmpty String name) {
+        return CommonResult.success(folderService.existedChildFolder(id, name));
     }
 }

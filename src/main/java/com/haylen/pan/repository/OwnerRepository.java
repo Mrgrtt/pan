@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 /**
  * @author haylen
@@ -18,7 +19,7 @@ public interface OwnerRepository extends JpaRepository<Owner, Long> {
      * @param username 用户名
      * @return 用户
      */
-    Owner findByUsername(String username);
+    Optional<Owner> findByUsername(String username);
 
     /**
      * 修改密码

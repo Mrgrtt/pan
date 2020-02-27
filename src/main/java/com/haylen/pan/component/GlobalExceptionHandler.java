@@ -28,7 +28,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({HttpMessageNotReadableException.class, MissingServletRequestParameterException.class, BindException.class,
             ServletRequestBindingException.class, MethodArgumentNotValidException.class, ConstraintViolationException.class})
     public CommonResult handleHttpMessageNotReadableException(Exception e) {
-        log.info("参数解析失败", e);
         if (e instanceof BindException){
             return CommonResult.validateFailed(((BindException)e)
                     .getBindingResult().getFieldError().getDefaultMessage());
@@ -39,14 +38,12 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public CommonResult handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
-        log.info("不支持当前请求方法", e);
         return CommonResult.methodNotAllowed();
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(DataAccessException.class)
     public CommonResult handleDataAccessException(DataAccessException e) {
-        log.info("数据库访数据访问异常", e);
         return CommonResult.validateFailed();
     }
 

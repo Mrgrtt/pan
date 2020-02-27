@@ -4,7 +4,6 @@ import com.haylen.pan.entity.File;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -63,4 +62,9 @@ public interface FileService {
      * @return 结果
      */
     int delete(Long id);
+
+    /**
+     * 文件是否已存在
+     */
+    boolean isExisted(Long folderId, String name);
 }

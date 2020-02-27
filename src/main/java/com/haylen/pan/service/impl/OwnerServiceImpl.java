@@ -30,21 +30,23 @@ public class OwnerServiceImpl implements OwnerService {
 
     @Override
     public Owner getOwnerByUsername(String name) {
-        return ownerRepository.findByUsername(name);
+        return ownerRepository.findByUsername(name).get();
     }
 
     @Override
     public OwnerDetails getOwnerDetailsByUsername(String name) {
-        Owner owner = ownerRepository.findByUsername(name);
-        if (owner == null) {
+        Optional<Owner> ownerOptional = ownerRepository.findByUsername(name);
+        if (!ownerOptional.isPresent()) {
             return null;
         }
-        owner.setPassword(null);
-        return new OwnerDetails(owner);
+        return new OwnerDetails(ownerOptional.get());
     }
 
     @Override
     public Owner register(OwnerParam ownerParam) {
+        if (isRegistered(ownerParam.getUsername())) {
+            return null;
+        }
         Owner owner = new Owner();
         owner.setUsername(ownerParam.getUsername());
         String encodedPassword = passwordEncoder.encode(ownerParam.getPassword());
@@ -68,22 +70,28 @@ public class OwnerServiceImpl implements OwnerService {
 
     @Override
     public Long getCurrentOwnerId() {
+        return getCurrentOwner().getId();
+    }
+
+    public Owner getCurrentOwner() {
         OwnerDetails details = (OwnerDetails) SecurityContextHolder
-            .getContext().getAuthentication().getPrincipal();
-        return details.getOwner().getId();
+                .getContext().getAuthentication().getPrincipal();
+        return details.getOwner();
     }
 
     @Override
     public int updatePassword(PasswordParam passwordParam) {
-        Optional<Owner> optionalOwner = ownerRepository.findById(getCurrentOwnerId());
-        if (!optionalOwner.isPresent()) {
-            return 0;
-        }
-        String encodeOldPassword = optionalOwner.get().getPassword();
+        String encodeOldPassword = getCurrentOwner().getPassword();
         if (!passwordEncoder.matches(passwordParam.getOldPassword(), encodeOldPassword)) {
             return 0;
         }
         return ownerRepository.updatePassword(passwordEncoder.encode(passwordParam.getNewPassword()),
                 LocalDateTime.now(), getCurrentOwnerId());
+    }
+
+    @Override
+    public Boolean isRegistered(String name) {
+        Optional<Owner> ownerOptional = ownerRepository.findByUsername(name);
+        return ownerOptional.isPresent();
     }
 }

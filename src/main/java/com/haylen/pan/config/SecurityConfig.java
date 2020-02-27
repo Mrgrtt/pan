@@ -33,6 +33,12 @@ import javax.servlet.Filter;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private OwnerService ownerService;
+    private final static String[] WHITE_LIST = {
+            "/owner/register*",
+            "/owner/login*",
+            "/file/download/*",
+            "/owner/isRegister*"
+    };
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -42,7 +48,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/owner/register*", "/owner/login*", "/file/download/*")
+                .antMatchers(SecurityConfig.WHITE_LIST)
                 .permitAll()
                 .antMatchers(HttpMethod.OPTIONS)
                 .permitAll()

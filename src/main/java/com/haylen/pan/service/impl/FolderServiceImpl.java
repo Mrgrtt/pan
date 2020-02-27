@@ -12,8 +12,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 /**
+ * 文件夹服务
  * @author haylen
  * @date 2019-12-27
  */
@@ -31,6 +33,10 @@ public class FolderServiceImpl implements FolderService {
     public Folder create(Long parentId, String name){
         /* 父目录是否存在 */
         if (notExisted(parentId)) {
+            return null;
+        }
+        /* 该目录是否已经存在 */
+        if (existedChildFolder(parentId, name)) {
             return null;
         }
         Folder folder = new Folder();
@@ -58,30 +64,48 @@ public class FolderServiceImpl implements FolderService {
         if (notExisted(newParentId)) {
             return 0;
         }
+        Optional<Folder> optionalFolder = folderRepository.findById(id);
+        if (!optionalFolder.isPresent()) {
+            return 0;
+        }
+        /* 该目录是否已经存在 */
+        if (existedChildFolder(newParentId, optionalFolder.get().getName())) {
+            return 0;
+        }
         return folderRepository.updateParent(newParentId,
                 LocalDateTime.now(), id, ownerService.getCurrentOwnerId());
     }
 
     @Override
     public int rename(String newName, Long id) {
+        Optional<Folder> optionalFolder = folderRepository.findById(id);
+        if (!optionalFolder.isPresent()) {
+            return 0;
+        }
+        if (optionalFolder.get().getName().equals(newName)) {
+            return 1;
+        }
+        /* 该目录是否已经存在 */
+        if (existedChildFolder(optionalFolder.get().getParentId(), newName)) {
+            return 0;
+        }
         return folderRepository.updateName(newName,
                 LocalDateTime.now(), id, ownerService.getCurrentOwnerId());
     }
 
     @Override
     public boolean notExisted(Long id) {
-        Folder folder = folderRepository.findFolderByIdAndOwnerId(id, ownerService.getCurrentOwnerId());
-        if (id !=0 && folder == null) {
+        Optional<Folder> folderOptional = folderRepository.findFolderByIdAndOwnerId(id, ownerService.getCurrentOwnerId());
+        if (id !=0 && !folderOptional.isPresent()) {
             return true;
         }
         return false;
     }
 
     @Override
-    public int delete(Long id) {
-        Folder folder = folderRepository.findFolderByIdAndOwnerId(id, ownerService.getCurrentOwnerId());
-        if (folder == null) {
-            return 0;
+    public void delete(Long id) {
+        if (notExisted(id)) {
+            return ;
         }
         List<File> files = fileService.listFile(id);
         for (File file: files) {
@@ -93,6 +117,13 @@ public class FolderServiceImpl implements FolderService {
             delete(child.getId());
         }
         folderRepository.deleteById(id);
-        return 1;
+    }
+
+    @Override
+    public Boolean existedChildFolder(Long id, String name) {
+        Optional<Folder> folderOptional =
+                folderRepository.findFolderByParentIdAndOwnerIdAndName(
+                        id, ownerService.getCurrentOwnerId(), name);
+        return folderOptional.isPresent();
     }
 }

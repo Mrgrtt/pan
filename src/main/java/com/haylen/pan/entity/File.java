@@ -1,6 +1,7 @@
 package com.haylen.pan.entity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
  * @date 2019-12-25
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "file")
 public class File extends BaseEntity {
@@ -39,7 +41,7 @@ public class File extends BaseEntity {
     private String mediaType;
 
     /**
-     * 文件大小
+     * 文件大小(Byte)
      */
     @Column(columnDefinition = "int unsigned", nullable = false)
     private Long size;

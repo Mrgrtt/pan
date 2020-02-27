@@ -38,6 +38,10 @@ public class FileServiceImpl implements FileService {
         if (folderService.notExisted(folderId)) {
             return null;
         }
+        /* 文件是否已存在 */
+        if (isExisted(folderId, multipartFile.getOriginalFilename())) {
+            return null;
+        }
         String storageKey = fileStorageService.putFile(multipartFile);
         if (storageKey == null) {
             return null;
@@ -71,6 +75,16 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public int rename(String newName, Long id) {
+        Optional<File> optionalFile = fileRepository.findById(id);
+        if (!optionalFile.isPresent()) {
+            return 0;
+        }
+        if (optionalFile.get().getName().equals(newName)) {
+            return 1;
+        }
+        if (isExisted(optionalFile.get().getFolderId(), newName)) {
+            return 0;
+        }
         return fileRepository.updateName(newName,
                 LocalDateTime.now(), id, ownerService.getCurrentOwnerId());
     }
@@ -78,6 +92,16 @@ public class FileServiceImpl implements FileService {
     @Override
     public int move(Long newFolderId, Long id) {
         if (folderService.notExisted(newFolderId)) {
+            return 0;
+        }
+        Optional<File> optionalFile = fileRepository.findById(id);
+        if (!optionalFile.isPresent()) {
+            return 0;
+        }
+        if (optionalFile.get().getOwnerId().equals(newFolderId)) {
+            return 1;
+        }
+        if (isExisted(newFolderId, optionalFile.get().getName())) {
             return 0;
         }
         return fileRepository.updateFolder(newFolderId,
@@ -95,5 +119,12 @@ public class FileServiceImpl implements FileService {
             return 1;
         }
         return 0;
+    }
+
+    @Override
+    public boolean isExisted(Long folderId, String name) {
+        Optional<File> optionalFile = fileRepository
+                .findFileByFolderIdAndOwnerIdAndName(folderId, ownerService.getCurrentOwnerId(), name);
+        return optionalFile.isPresent();
     }
 }
