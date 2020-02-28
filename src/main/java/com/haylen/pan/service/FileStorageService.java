@@ -22,10 +22,4 @@ public interface FileStorageService {
      * @return 文件流
      */
     InputStream getFile(String storageKey);
-
-    /**
-     * 删文件
-     * @param storageKey 储存key
-     */
-    void deleteFile(String storageKey);
 }

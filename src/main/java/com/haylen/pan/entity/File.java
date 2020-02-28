@@ -1,5 +1,6 @@
 package com.haylen.pan.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -45,4 +46,11 @@ public class File extends BaseEntity {
      */
     @Column(columnDefinition = "int unsigned", nullable = false)
     private Long size;
+
+    /**
+     * 删除标志， 1->已删除 0->未删除
+     */
+    @JsonIgnore
+    @Column(columnDefinition = "tinyint unsigned default 0", nullable = false)
+    private Integer deleted;
 }

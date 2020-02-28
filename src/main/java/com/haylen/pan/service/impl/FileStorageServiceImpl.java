@@ -63,15 +63,4 @@ public class FileStorageServiceImpl implements FileStorageService {
         }
         return null;
     }
-
-    @Override
-    public void deleteFile(String storageKey) {
-        Long ownerId = ownerService.getCurrentOwnerId();
-        Path path = Paths.get(fileStoragePath, ownerId.toString(), storageKey);
-        try {
-            Files.deleteIfExists(path);
-        } catch (IOException e) {
-            log.info(e.getMessage());
-        }
-    }
 }

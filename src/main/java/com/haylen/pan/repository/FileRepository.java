@@ -16,15 +16,20 @@ import java.util.Optional;
  */
 public interface FileRepository extends JpaRepository<File, Long> {
     /**
+     * 根据id查找
+     */
+    Optional<File> findFileByIdAndDeleted(Long id, Integer deleted);
+
+    /**
      * 根据储存key获取文件
      * @param storageKey 储存key
      */
-    File findFileByStorageKey(String storageKey);
+    Optional<File> findFileByStorageKey(String storageKey);
 
     /**
      * 获取指定目录下的文件
      */
-    List<File> findFilesByFolderIdAndOwnerId(Long folderId, Long ownerId);
+    List<File> findFilesByFolderIdAndOwnerIdAndDeleted(Long folderId, Long ownerId, Integer deleted);
 
     /**
      * 重命名文件
@@ -47,11 +52,12 @@ public interface FileRepository extends JpaRepository<File, Long> {
      */
     @Modifying
     @Transactional(rollbackFor = Exception.class)
-    @Query("delete from File f where f.id = ?1 and f.ownerId = ?2")
+    @Query("update File f set f.deleted = 1 where f.id = ?1 and f.ownerId = ?2")
     int delete(Long id, Long ownerId);
 
     /**
      * 查找文件
      */
-    Optional<File> findFileByFolderIdAndOwnerIdAndName(Long folderId, Long ownerId, String name);
+    Optional<File> findFileByFolderIdAndOwnerIdAndNameAndDeleted(
+            Long folderId, Long ownerId, String name, Integer deleted);
 }

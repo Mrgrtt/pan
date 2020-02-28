@@ -54,12 +54,13 @@ public class FileServiceImpl implements FileService {
         file.setMediaType(multipartFile.getContentType());
         file.setSize(multipartFile.getSize());
         file.setGmtModified(LocalDateTime.now());
+        file.setDeleted(0);
         return fileRepository.save(file);
     }
 
     @Override
     public File getFileByStorageKey(String key) {
-        return fileRepository.findFileByStorageKey(key);
+        return fileRepository.findFileByStorageKey(key).get();
     }
 
     @Override
@@ -69,13 +70,13 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public List<File> listFile(Long folderId) {
-        return fileRepository.findFilesByFolderIdAndOwnerId(
-                folderId, ownerService.getCurrentOwnerId());
+        return fileRepository.findFilesByFolderIdAndOwnerIdAndDeleted(
+                folderId, ownerService.getCurrentOwnerId(), 0);
     }
 
     @Override
     public int rename(String newName, Long id) {
-        Optional<File> optionalFile = fileRepository.findById(id);
+        Optional<File> optionalFile = fileRepository.findFileByIdAndDeleted(id, 0);
         if (!optionalFile.isPresent()) {
             return 0;
         }
@@ -94,7 +95,7 @@ public class FileServiceImpl implements FileService {
         if (folderService.notExisted(newFolderId)) {
             return 0;
         }
-        Optional<File> optionalFile = fileRepository.findById(id);
+        Optional<File> optionalFile = fileRepository.findFileByIdAndDeleted(id, 0);
         if (!optionalFile.isPresent()) {
             return 0;
         }
@@ -110,21 +111,17 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public int delete(Long id) {
-        Optional<File> optionalFile = fileRepository.findById(id);
+        Optional<File> optionalFile = fileRepository.findFileByIdAndDeleted(id, 0);
         if (!optionalFile.isPresent()) {
             return 0;
         }
-        if (fileRepository.delete(id, ownerService.getCurrentOwnerId()) > 0) {
-            fileStorageService.deleteFile(optionalFile.get().getStorageKey());
-            return 1;
-        }
-        return 0;
+        return fileRepository.delete(id, ownerService.getCurrentOwnerId());
     }
 
     @Override
     public boolean isExisted(Long folderId, String name) {
         Optional<File> optionalFile = fileRepository
-                .findFileByFolderIdAndOwnerIdAndName(folderId, ownerService.getCurrentOwnerId(), name);
+                .findFileByFolderIdAndOwnerIdAndNameAndDeleted(folderId, ownerService.getCurrentOwnerId(), name, 0);
         return optionalFile.isPresent();
     }
 }
