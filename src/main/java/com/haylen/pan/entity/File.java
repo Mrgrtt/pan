@@ -32,7 +32,7 @@ public class File extends BaseEntity {
     /**
      * 用于储存和检索文件
      */
-    @Column(name = "storage_key", columnDefinition = "varchar(64)", nullable = false, unique = true)
+    @Column(name = "storage_key", columnDefinition = "varchar(256)", nullable = false)
     private String storageKey;
 
     /**

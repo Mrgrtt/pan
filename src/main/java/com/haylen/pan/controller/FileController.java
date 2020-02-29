@@ -81,6 +81,7 @@ public class FileController {
                     readSum = readSum + readCount;
                 }
                 outputStream.flush();
+                inputStream.close();
             }
         };
         HttpHeaders headers = new HttpHeaders();
