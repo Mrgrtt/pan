@@ -68,12 +68,14 @@ public class FolderServiceImpl implements FolderService {
         if (!optionalFolder.isPresent()) {
             return 0;
         }
+        if(optionalFolder.get().getParentId().equals(newParentId)) {
+            return 1;
+        }
         /* 该目录是否已经存在 */
         if (existedChildFolder(newParentId, optionalFolder.get().getName())) {
             return 0;
         }
-        return folderRepository.updateParent(newParentId,
-                LocalDateTime.now(), id, ownerService.getCurrentOwnerId());
+        return folderRepository.updateParent(newParentId, id, ownerService.getCurrentOwnerId());
     }
 
     @Override
@@ -89,8 +91,7 @@ public class FolderServiceImpl implements FolderService {
         if (existedChildFolder(optionalFolder.get().getParentId(), newName)) {
             return 0;
         }
-        return folderRepository.updateName(newName,
-                LocalDateTime.now(), id, ownerService.getCurrentOwnerId());
+        return folderRepository.updateName(newName, id, ownerService.getCurrentOwnerId());
     }
 
     @Override
@@ -120,10 +121,44 @@ public class FolderServiceImpl implements FolderService {
     }
 
     @Override
+    public int copy(Long id, Long toFolderId) {
+        Optional<Folder> optionalFolder = folderRepository
+                .findFolderByIdAndOwnerId(id, ownerService.getCurrentOwnerId());
+        if (!optionalFolder.isPresent()) {
+            return 0;
+        }
+        Folder folder = copy(toFolderId, optionalFolder.get());
+        folder = folderRepository.saveAndFlush(folder);
+
+        /* 复制文件 */
+        List<File> files = fileService.listFile(id);
+        for (File file: files) {
+            fileService.copy(folder.getId(), file.getId());
+        }
+
+        /* 复制子文件夹 */
+        List<Folder> folders = listChildFolder(id);
+        for (Folder f: folders) {
+            copy(f.getId(), folder.getId());
+        }
+        return 1;
+    }
+
+    private Folder copy(Long parentId, Folder oldFolder) {
+        Folder folder = new Folder();
+        folder.setName(oldFolder.getName());
+        folder.setOwnerId(oldFolder.getOwnerId());
+        folder.setParentId(parentId);
+        folder.setGmtCreate(LocalDateTime.now());
+        folder.setGmtModified(LocalDateTime.now());
+        return folder;
+    }
+
+    @Override
     public Boolean existedChildFolder(Long id, String name) {
         Optional<Folder> folderOptional =
-                folderRepository.findFolderByParentIdAndOwnerIdAndName(
-                        id, ownerService.getCurrentOwnerId(), name);
+                folderRepository.findFolderByParentIdAndNameAndOwnerId(
+                        id, name, ownerService.getCurrentOwnerId());
         return folderOptional.isPresent();
     }
 }

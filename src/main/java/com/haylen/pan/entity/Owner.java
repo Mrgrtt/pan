@@ -1,5 +1,6 @@
 package com.haylen.pan.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -23,4 +24,10 @@ public class Owner extends BaseEntity{
      */
     @Column(name = "password", columnDefinition = "char(64)", nullable = false)
     private String password;
+
+    /**
+     * 头像url
+     */
+    @Column(name = "avatar", columnDefinition = "varchar(128) default ''", nullable = false)
+    private String avatar;
 }

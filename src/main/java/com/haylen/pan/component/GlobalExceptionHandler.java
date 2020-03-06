@@ -44,6 +44,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(DataAccessException.class)
     public CommonResult handleDataAccessException(DataAccessException e) {
+        log.error(e.getMessage());
         return CommonResult.validateFailed();
     }
 

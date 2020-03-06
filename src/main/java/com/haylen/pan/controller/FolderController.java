@@ -64,4 +64,12 @@ public class FolderController {
                                            @RequestParam @NotEmpty String name) {
         return CommonResult.success(folderService.existedChildFolder(id, name));
     }
+
+    @RequestMapping(value = "/copy/{id}", method = RequestMethod.POST)
+    public CommonResult copy(@PathVariable Long id, @RequestParam Long toFolderId) {
+        if (folderService.copy(id, toFolderId) <= 0) {
+            return CommonResult.failed();
+        }
+        return CommonResult.success();
+    }
 }

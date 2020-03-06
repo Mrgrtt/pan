@@ -41,6 +41,11 @@ public class FileController {
                         @RequestHeader(name = "Range", required = false) String rangeHeader){
         InputStream inputStream = fileService.download(key);
         File file = fileService.getFileByStorageKey(key);
+        if (file == null) {
+            file = new File();
+            file.setName("file");
+            file.setMediaType(MediaType.IMAGE_JPEG_VALUE);
+        }
         long fileLength = 0;
         String encodeFilename;
         if (inputStream == null) {
@@ -120,9 +125,7 @@ public class FileController {
 
     @RequestMapping(value = "/delete/{id}", method = RequestMethod.POST)
     public CommonResult delete(@PathVariable Long id) {
-        if (fileService.delete(id) <= 0) {
-            return CommonResult.failed();
-        }
+        fileService.delete(id);
         return CommonResult.success();
     }
 
@@ -130,4 +133,15 @@ public class FileController {
     public CommonResult existed(@RequestParam Long folderId, @RequestParam @NotEmpty String name) {
         return CommonResult.success(fileService.isExisted(folderId, name));
     }
+
+    @RequestMapping(value = "/copy/{id}", method = RequestMethod.POST)
+    public CommonResult copy(@RequestParam Long toFolderId, @PathVariable Long id) {
+        File file = null;
+        if ((file = fileService.copy(toFolderId, id)) == null) {
+            return CommonResult.failed();
+        }
+        return CommonResult.success(file);
+
+    }
+
 }

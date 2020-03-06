@@ -61,10 +61,15 @@ public interface FileService {
      * @param id 文件id
      * @return 结果
      */
-    int delete(Long id);
+    void delete(Long id);
 
     /**
      * 文件是否已存在
      */
     boolean isExisted(Long folderId, String name);
+
+    /**
+     * 复制
+     */
+    File copy(Long toFolderId, Long id);
 }

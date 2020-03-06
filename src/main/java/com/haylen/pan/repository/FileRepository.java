@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,34 +17,36 @@ public interface FileRepository extends JpaRepository<File, Long> {
     /**
      * 根据id查找
      */
-    Optional<File> findFileByIdAndDeleted(Long id, Integer deleted);
+    @Query("select f from File f where f.id = ?1 and f.ownerId = ?2 and f.deleted = 0")
+    Optional<File> findFileByIdAndOwnerId(Long id, Long ownerId);
 
     /**
      * 根据储存key获取文件
      * @param storageKey 储存key
      */
-    Optional<File> findFileByStorageKey(String storageKey);
+    File findFileByStorageKey(String storageKey);
 
     /**
      * 获取指定目录下的文件
      */
-    List<File> findFilesByFolderIdAndOwnerIdAndDeleted(Long folderId, Long ownerId, Integer deleted);
+    @Query("select f from File f where f.folderId = ?1 and f.ownerId = ?2 and f.deleted = 0")
+    List<File> findFilesByFolderIdAndOwnerId(Long folderId, Long ownerId);
 
     /**
-     * 重命名文件
+     * 更新文件名
      */
     @Modifying
     @Transactional(rollbackFor = Exception.class)
-    @Query("update File f set f.name = ?1, f.gmtModified = ?2 where f.id = ?3 and f.ownerId = ?4")
-    int updateName(String newName, LocalDateTime time, Long id, Long ownerId);
+    @Query("update File f set f.name = ?1, f.gmtModified = current_timestamp where f.id = ?2 and f.ownerId = ?3")
+    int updateName(String newName, Long id, Long ownerId);
 
     /**
-     * 修改文件夹
+     * 更新文件夹id
      */
     @Modifying
     @Transactional(rollbackFor = Exception.class)
-    @Query("update File f set f.folderId = ?1, f.gmtModified = ?2 where f.id = ?3 and f.ownerId = ?4")
-    int updateFolder(Long newFolderId, LocalDateTime time, Long id, Long ownerId);
+    @Query("update File f set f.folderId = ?1, f.gmtModified = current_timestamp where f.id = ?2 and f.ownerId = ?3")
+    int updateFolderId(Long newFolderId, Long id, Long ownerId);
 
     /**
      * 删除文件
@@ -58,6 +59,6 @@ public interface FileRepository extends JpaRepository<File, Long> {
     /**
      * 查找文件
      */
-    Optional<File> findFileByFolderIdAndOwnerIdAndNameAndDeleted(
-            Long folderId, Long ownerId, String name, Integer deleted);
+    @Query("select f from File f where f.folderId = ?1 and f.name = ?2 and f.ownerId = ?3 and f.deleted = 0")
+    Optional<File> findFileByFolderIdAndNameAndOwnerId(Long folderId,  String name, Long ownerId);
 }

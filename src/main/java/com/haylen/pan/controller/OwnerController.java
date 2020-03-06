@@ -1,12 +1,14 @@
 package com.haylen.pan.controller;
 
 import com.haylen.pan.dto.CommonResult;
+import com.haylen.pan.dto.OwnerInfo;
 import com.haylen.pan.dto.OwnerParam;
 import com.haylen.pan.dto.PasswordParam;
 import com.haylen.pan.entity.Owner;
 import com.haylen.pan.service.OwnerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
@@ -50,5 +52,22 @@ public class OwnerController {
     @RequestMapping("/isRegistered")
     public CommonResult isRegistered(@RequestParam @NotEmpty String username) {
         return CommonResult.success(ownerService.isRegistered(username));
+    }
+
+    @RequestMapping("/info")
+    public CommonResult getInfo() {
+        Owner owner = ownerService.getCurrentOwner();
+        OwnerInfo ownerInfo = new OwnerInfo();
+        ownerInfo.setName(owner.getUsername());
+        ownerInfo.setAvatar(owner.getAvatar());
+        return CommonResult.success(ownerInfo);
+    }
+
+    @RequestMapping(value = "/avatar/upload", method = RequestMethod.POST)
+    public CommonResult uploadAvatar(MultipartFile file) {
+        if (ownerService.uploadAvatar(file) <= 0) {
+            return CommonResult.failed();
+        }
+        return CommonResult.success();
     }
 }

@@ -4,6 +4,7 @@ import com.haylen.pan.bo.OwnerDetails;
 import com.haylen.pan.dto.OwnerParam;
 import com.haylen.pan.dto.PasswordParam;
 import com.haylen.pan.entity.Owner;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 用户服务
@@ -32,6 +33,11 @@ public interface OwnerService {
     String login(String username, String password);
 
     /**
+     * 获取现在登录的用户
+     */
+    Owner getCurrentOwner();
+
+    /**
      * 获取现在登录的用户id
      */
     Long getCurrentOwnerId();
@@ -45,4 +51,9 @@ public interface OwnerService {
      * 该用户名是否已被注册
      */
     Boolean isRegistered(String name);
+
+    /**
+     * 头像上传
+     */
+    int uploadAvatar(MultipartFile file);
 }

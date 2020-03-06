@@ -5,13 +5,16 @@ import com.haylen.pan.dto.OwnerParam;
 import com.haylen.pan.dto.PasswordParam;
 import com.haylen.pan.entity.Owner;
 import com.haylen.pan.repository.OwnerRepository;
+import com.haylen.pan.service.FileStorageService;
 import com.haylen.pan.service.OwnerService;
 import com.haylen.pan.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.net.InetAddress;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -27,6 +30,10 @@ public class OwnerServiceImpl implements OwnerService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private JwtUtil jwtUtil;
+    @Autowired
+    private FileStorageService fileStorageService;
+
+    private final static String FILE_DOWNLOAD_URL = "/file/download/";
 
     @Override
     public Owner getOwnerByUsername(String name) {
@@ -73,6 +80,7 @@ public class OwnerServiceImpl implements OwnerService {
         return getCurrentOwner().getId();
     }
 
+    @Override
     public Owner getCurrentOwner() {
         OwnerDetails details = (OwnerDetails) SecurityContextHolder
                 .getContext().getAuthentication().getPrincipal();
@@ -85,13 +93,33 @@ public class OwnerServiceImpl implements OwnerService {
         if (!passwordEncoder.matches(passwordParam.getOldPassword(), encodeOldPassword)) {
             return 0;
         }
-        return ownerRepository.updatePassword(passwordEncoder.encode(passwordParam.getNewPassword()),
-                LocalDateTime.now(), getCurrentOwnerId());
+        return ownerRepository.updatePassword(
+                passwordEncoder.encode(passwordParam.getNewPassword()),getCurrentOwnerId());
     }
 
     @Override
     public Boolean isRegistered(String name) {
         Optional<Owner> ownerOptional = ownerRepository.findByUsername(name);
         return ownerOptional.isPresent();
+    }
+
+    @Override
+    public int uploadAvatar(MultipartFile file) {
+        String imageContentTypePrefix = "image/";
+        if (!file.getContentType().startsWith(imageContentTypePrefix)) {
+            return 0;
+        }
+        String storageKey = fileStorageService.putFile(file);
+        if (storageKey == null) {
+            return 0;
+        }
+        String host;
+        try {
+            host = InetAddress.getLocalHost().getHostAddress();
+        } catch (Exception e) {
+            return 0;
+        }
+        String avatarUrl = "http://" + host + ":8080" + FILE_DOWNLOAD_URL + storageKey;
+        return ownerRepository.updateAvatar(avatarUrl, getCurrentOwnerId());
     }
 }

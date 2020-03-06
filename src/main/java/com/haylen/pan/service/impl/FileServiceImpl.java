@@ -60,7 +60,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public File getFileByStorageKey(String key) {
-        return fileRepository.findFileByStorageKey(key).get();
+        return fileRepository.findFileByStorageKey(key);
     }
 
     @Override
@@ -70,13 +70,14 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public List<File> listFile(Long folderId) {
-        return fileRepository.findFilesByFolderIdAndOwnerIdAndDeleted(
-                folderId, ownerService.getCurrentOwnerId(), 0);
+        return fileRepository.findFilesByFolderIdAndOwnerId(
+                folderId, ownerService.getCurrentOwnerId());
     }
 
     @Override
     public int rename(String newName, Long id) {
-        Optional<File> optionalFile = fileRepository.findFileByIdAndDeleted(id, 0);
+        Optional<File> optionalFile = fileRepository
+                .findFileByIdAndOwnerId(id, ownerService.getCurrentOwnerId());
         if (!optionalFile.isPresent()) {
             return 0;
         }
@@ -86,8 +87,7 @@ public class FileServiceImpl implements FileService {
         if (isExisted(optionalFile.get().getFolderId(), newName)) {
             return 0;
         }
-        return fileRepository.updateName(newName,
-                LocalDateTime.now(), id, ownerService.getCurrentOwnerId());
+        return fileRepository.updateName(newName, id, ownerService.getCurrentOwnerId());
     }
 
     @Override
@@ -95,7 +95,8 @@ public class FileServiceImpl implements FileService {
         if (folderService.notExisted(newFolderId)) {
             return 0;
         }
-        Optional<File> optionalFile = fileRepository.findFileByIdAndDeleted(id, 0);
+        Optional<File> optionalFile = fileRepository.
+                findFileByIdAndOwnerId(id, ownerService.getCurrentOwnerId());
         if (!optionalFile.isPresent()) {
             return 0;
         }
@@ -105,23 +106,56 @@ public class FileServiceImpl implements FileService {
         if (isExisted(newFolderId, optionalFile.get().getName())) {
             return 0;
         }
-        return fileRepository.updateFolder(newFolderId,
-                LocalDateTime.now(), id, ownerService.getCurrentOwnerId());
+        return fileRepository.updateFolderId(newFolderId, id, ownerService.getCurrentOwnerId());
     }
 
     @Override
-    public int delete(Long id) {
-        Optional<File> optionalFile = fileRepository.findFileByIdAndDeleted(id, 0);
+    public void delete(Long id) {
+        Optional<File> optionalFile = fileRepository.
+                findFileByIdAndOwnerId(id, ownerService.getCurrentOwnerId());
         if (!optionalFile.isPresent()) {
-            return 0;
+            return;
         }
-        return fileRepository.delete(id, ownerService.getCurrentOwnerId());
+        fileRepository.delete(id, ownerService.getCurrentOwnerId());
     }
 
     @Override
     public boolean isExisted(Long folderId, String name) {
         Optional<File> optionalFile = fileRepository
-                .findFileByFolderIdAndOwnerIdAndNameAndDeleted(folderId, ownerService.getCurrentOwnerId(), name, 0);
+                .findFileByFolderIdAndNameAndOwnerId(folderId, name, ownerService.getCurrentOwnerId());
         return optionalFile.isPresent();
+    }
+
+    @Override
+    public File copy(Long toFolderId, Long id) {
+        Optional<File> optionalFile = fileRepository.
+                findFileByIdAndOwnerId(id, ownerService.getCurrentOwnerId());
+        if (!optionalFile.isPresent()) {
+            return null;
+        }
+        File oldFile = optionalFile.get();
+        if (oldFile.getFolderId().equals(toFolderId)) {
+            return oldFile;
+        }
+        /* 是否存在同名文件 */
+        if (isExisted(toFolderId, oldFile.getName())) {
+            return null;
+        }
+        File newFile = copy(toFolderId, oldFile);
+        return fileRepository.save(newFile);
+    }
+
+    private File copy(Long folderId,File oldFile) {
+        File newFile = new File();
+        newFile.setGmtModified(LocalDateTime.now());
+        newFile.setGmtCreate(LocalDateTime.now());
+        newFile.setFolderId(folderId);
+        newFile.setSize(oldFile.getSize());
+        newFile.setDeleted(oldFile.getDeleted());
+        newFile.setMediaType(oldFile.getMediaType());
+        newFile.setStorageKey(oldFile.getStorageKey());
+        newFile.setOwnerId(oldFile.getOwnerId());
+        newFile.setName(oldFile.getName());
+        return newFile;
     }
 }

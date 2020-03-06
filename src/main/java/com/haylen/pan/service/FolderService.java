@@ -21,7 +21,7 @@ public interface FolderService {
     List<Folder> listChildFolder(Long id);
 
     /**
-     * 更改父文件夹
+     * 移动文件夹
      */
     int move(Long newParentId, Long id);
 
@@ -39,6 +39,12 @@ public interface FolderService {
      * 删除文件夹及其子文件夹和文件
      */
     void delete(Long id);
+
+    /**
+     * 复制目录下的所有子文件夹和文件
+     * @param toFolderId 复制的目的目录
+     */
+    int copy(Long id, Long toFolderId);
 
     /**
      * 是否存在该名字的子文件夹

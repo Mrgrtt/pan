@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,16 +24,16 @@ public interface FolderRepository extends JpaRepository<Folder, Long> {
      */
     @Modifying
     @Transactional(rollbackFor = Exception.class)
-    @Query("update Folder c set c.parentId = ?1, c.gmtModified = ?2 where c.id = ?3 and c.ownerId = ?4")
-    int updateParent(Long newParentId, LocalDateTime dateTime, Long id, Long ownerId);
+    @Query("update Folder c set c.parentId = ?1, c.gmtModified = current_timestamp where c.id = ?2 and c.ownerId = ?3")
+    int updateParent(Long newParentId, Long id, Long ownerId);
 
     /**
      * 重命名
      */
     @Modifying
     @Transactional(rollbackFor = Exception.class)
-    @Query("update Folder c set c.name = ?1, c.gmtModified = ?2 where c.id = ?3 and c.ownerId = ?4")
-    int updateName(String newName, LocalDateTime dateTime, Long id, Long ownerId);
+    @Query("update Folder c set c.name = ?1, c.gmtModified = current_timestamp where c.id = ?2 and c.ownerId = ?3")
+    int updateName(String newName, Long id, Long ownerId);
 
     /**
      * 查找文件夹通过id
@@ -44,5 +43,5 @@ public interface FolderRepository extends JpaRepository<Folder, Long> {
     /**
      * 是否存在该名字的子文件夹
      */
-    Optional<Folder> findFolderByParentIdAndOwnerIdAndName(Long parentId, Long ownerId, String name);
+    Optional<Folder> findFolderByParentIdAndNameAndOwnerId(Long parentId, String name, Long ownerId);
 }
