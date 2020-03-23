@@ -72,11 +72,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected UserDetailsService userDetailsService() {
         return name -> {
-            UserDetails userDetails = ownerService.getOwnerDetailsByUsername(name);
-            if (userDetails == null) {
-                throw new UsernameNotFoundException("用户不存在");
-            }
-            return userDetails;
+            return (UserDetails) ownerService.getOwnerDetailsByUsername(name);
         };
     }
 

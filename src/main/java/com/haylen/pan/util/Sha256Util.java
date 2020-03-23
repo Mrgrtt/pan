@@ -18,7 +18,6 @@ public class Sha256Util {
         }
         input.close();
         byte[] sha256Bytes = messageDigest.digest();
-        String code = new BigInteger(1, sha256Bytes).toString(16);
-        return code;
+       return new BigInteger(1, sha256Bytes).toString(16);
     }
 }

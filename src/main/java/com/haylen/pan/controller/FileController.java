@@ -40,6 +40,7 @@ public class FileController {
     public ResponseEntity<StreamingResponseBody> download(@PathVariable String key,
                         @RequestHeader(name = "Range", required = false) String rangeHeader){
         InputStream inputStream = fileService.download(key);
+        // 非网盘文件默认类型为图片，如上传的头像
         File file = fileService.getFileByStorageKey(key);
         if (file == null) {
             file = new File();
@@ -48,9 +49,7 @@ public class FileController {
         }
         long fileLength = 0;
         String encodeFilename;
-        if (inputStream == null) {
-            return ResponseEntity.badRequest().build();
-        }
+
         try {
             fileLength = inputStream.available();
             encodeFilename = URLEncoder.encode(file.getName(), StandardCharsets.UTF_8);
@@ -136,8 +135,8 @@ public class FileController {
 
     @RequestMapping(value = "/copy/{id}", method = RequestMethod.POST)
     public CommonResult copy(@RequestParam Long toFolderId, @PathVariable Long id) {
-        File file = null;
-        if ((file = fileService.copy(toFolderId, id)) == null) {
+        File file = fileService.copy(toFolderId, id);
+        if (file == null) {
             return CommonResult.failed();
         }
         return CommonResult.success(file);

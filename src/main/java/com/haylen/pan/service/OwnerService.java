@@ -1,7 +1,7 @@
 package com.haylen.pan.service;
 
 import com.haylen.pan.bo.OwnerDetails;
-import com.haylen.pan.dto.OwnerParam;
+import com.haylen.pan.dto.RegisterParam;
 import com.haylen.pan.dto.PasswordParam;
 import com.haylen.pan.entity.Owner;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,10 +12,6 @@ import org.springframework.web.multipart.MultipartFile;
  * @date 2019-12-26
  */
 public interface OwnerService {
-    /**
-     * 根据用户名获取用户
-     */
-    Owner getOwnerByUsername(String name);
 
     /**
      * 根据用户名获取用户细节
@@ -25,7 +21,7 @@ public interface OwnerService {
     /**
      * 注册
      */
-    Owner register(OwnerParam ownerParam);
+    Owner register(RegisterParam registerParam);
 
     /**
      * 登录

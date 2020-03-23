@@ -1,12 +1,14 @@
 package com.haylen.pan.service.impl;
 
 import com.haylen.pan.entity.File;
+import com.haylen.pan.exception.ApiException;
 import com.haylen.pan.repository.FileRepository;
 import com.haylen.pan.service.FolderService;
 import com.haylen.pan.service.FileService;
 import com.haylen.pan.service.FileStorageService;
 import com.haylen.pan.service.OwnerService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,18 +36,15 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public File upload(MultipartFile multipartFile, Long folderId) {
-        /* 该目录是否存在 */
+        /* 该目录是不存在 */
         if (folderService.notExisted(folderId)) {
-            return null;
+            throw new ApiException("该目录是不存在");
         }
-        /* 文件是否已存在 */
+        /* 存在同命文件 */
         if (isExisted(folderId, multipartFile.getOriginalFilename())) {
-            return null;
+            throw new ApiException("目录存在同名文件");
         }
         String storageKey = fileStorageService.putFile(multipartFile);
-        if (storageKey == null) {
-            return null;
-        }
         File file = new File();
         file.setFolderId(folderId);
         file.setOwnerId(ownerService.getCurrentOwnerId());
@@ -79,13 +78,13 @@ public class FileServiceImpl implements FileService {
         Optional<File> optionalFile = fileRepository
                 .findFileByIdAndOwnerId(id, ownerService.getCurrentOwnerId());
         if (!optionalFile.isPresent()) {
-            return 0;
+            throw new ApiException("文件不存在");
         }
         if (optionalFile.get().getName().equals(newName)) {
             return 1;
         }
         if (isExisted(optionalFile.get().getFolderId(), newName)) {
-            return 0;
+            throw new ApiException("所在目录存在同名文件");
         }
         return fileRepository.updateName(newName, id, ownerService.getCurrentOwnerId());
     }
@@ -93,18 +92,18 @@ public class FileServiceImpl implements FileService {
     @Override
     public int move(Long newFolderId, Long id) {
         if (folderService.notExisted(newFolderId)) {
-            return 0;
+            throw new ApiException("不存在该目录");
         }
         Optional<File> optionalFile = fileRepository.
                 findFileByIdAndOwnerId(id, ownerService.getCurrentOwnerId());
         if (!optionalFile.isPresent()) {
-            return 0;
+            throw new ApiException("不存在该文件");
         }
         if (optionalFile.get().getOwnerId().equals(newFolderId)) {
             return 1;
         }
         if (isExisted(newFolderId, optionalFile.get().getName())) {
-            return 0;
+            throw new ApiException("目录存在同名文件");
         }
         return fileRepository.updateFolderId(newFolderId, id, ownerService.getCurrentOwnerId());
     }
@@ -139,7 +138,7 @@ public class FileServiceImpl implements FileService {
         }
         /* 是否存在同名文件 */
         if (isExisted(toFolderId, oldFile.getName())) {
-            return null;
+            throw new ApiException("目录存在同名文件");
         }
         File newFile = copy(toFolderId, oldFile);
         return fileRepository.save(newFile);

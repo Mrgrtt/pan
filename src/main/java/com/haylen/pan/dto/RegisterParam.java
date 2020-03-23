@@ -10,7 +10,7 @@ import javax.validation.constraints.NotEmpty;
  * @date 2019-12-26
  */
 @Data
-public class OwnerParam {
+public class RegisterParam {
     @NotEmpty(message = "用户名不能为空")
     private String username;
     @NotEmpty(message = "密码不能为空")

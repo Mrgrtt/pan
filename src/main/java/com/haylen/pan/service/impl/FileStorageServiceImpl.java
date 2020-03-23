@@ -1,5 +1,6 @@
 package com.haylen.pan.service.impl;
 
+import com.haylen.pan.exception.ApiException;
 import com.haylen.pan.service.FileStorageService;
 import com.haylen.pan.util.Sha256Util;
 import lombok.extern.slf4j.Slf4j;
@@ -26,12 +27,12 @@ public class FileStorageServiceImpl implements FileStorageService {
     @Override
     public String putFile(MultipartFile multipartFile) {
         Path folderPath = Paths.get(fileStoragePath);
-        String storageKey = null;
+        String storageKey;
         try {
             storageKey = Sha256Util.encode(multipartFile.getInputStream());
         } catch (Exception e) {
             log.info("文件Sha256值计算失败", e);
-            return null;
+            throw new ApiException("文件上传失败");
         }
         try {
             Path filePath = folderPath.resolve(storageKey);
@@ -44,6 +45,7 @@ public class FileStorageServiceImpl implements FileStorageService {
             multipartFile.transferTo(filePath);
         } catch (IOException e) {
             log.info("文件本地保存失败", e);
+            throw new ApiException("文件上传失败");
         }
         return storageKey;
     }
@@ -55,7 +57,7 @@ public class FileStorageServiceImpl implements FileStorageService {
             return Files.newInputStream(filePath);
         } catch (IOException e) {
             log.info(e.getMessage());
+            throw new ApiException("文件下载失败");
         }
-        return null;
     }
 }

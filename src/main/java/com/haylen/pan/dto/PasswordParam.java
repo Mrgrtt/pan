@@ -9,8 +9,8 @@ import org.hibernate.validator.constraints.Length;
  */
 @Data
 public class PasswordParam {
-    @Length(min = 8)
+    @Length(min = 8, message = "密码最短为8位")
     private String newPassword;
-    @Length(min = 8)
+    @Length(min = 8, message = "密码最短为8位")
     private String oldPassword;
 }

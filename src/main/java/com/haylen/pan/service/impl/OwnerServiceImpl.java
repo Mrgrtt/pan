@@ -1,9 +1,10 @@
 package com.haylen.pan.service.impl;
 
 import com.haylen.pan.bo.OwnerDetails;
-import com.haylen.pan.dto.OwnerParam;
+import com.haylen.pan.dto.RegisterParam;
 import com.haylen.pan.dto.PasswordParam;
 import com.haylen.pan.entity.Owner;
+import com.haylen.pan.exception.ApiException;
 import com.haylen.pan.repository.OwnerRepository;
 import com.haylen.pan.service.FileStorageService;
 import com.haylen.pan.service.OwnerService;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.net.InetAddress;
@@ -36,28 +38,19 @@ public class OwnerServiceImpl implements OwnerService {
     private final static String FILE_DOWNLOAD_URL = "/file/download/";
 
     @Override
-    public Owner getOwnerByUsername(String name) {
-        return ownerRepository.findByUsername(name).get();
-    }
-
-    @Override
     public OwnerDetails getOwnerDetailsByUsername(String name) {
-        Optional<Owner> ownerOptional = ownerRepository.findByUsername(name);
-        if (!ownerOptional.isPresent()) {
-            return null;
-        }
-        return new OwnerDetails(ownerOptional.get());
+        return new OwnerDetails(getOwnerByUsername(name));
     }
 
     @Override
-    public Owner register(OwnerParam ownerParam) {
-        if (isRegistered(ownerParam.getUsername())) {
-            return null;
+    public Owner register(RegisterParam registerParam) {
+        if (isRegistered(registerParam.getUsername())) {
+            throw new ApiException("用户名已被注册");
         }
         Owner owner = new Owner();
-        owner.setUsername(ownerParam.getUsername());
-        String encodedPassword = passwordEncoder.encode(ownerParam.getPassword());
-        ownerParam = null;
+        owner.setUsername(registerParam.getUsername());
+        String encodedPassword = passwordEncoder.encode(registerParam.getPassword());
+        registerParam = null;
         owner.setPassword(encodedPassword);
         owner.setGmtModified(LocalDateTime.now());
         return ownerRepository.save(owner);
@@ -66,11 +59,8 @@ public class OwnerServiceImpl implements OwnerService {
     @Override
     public String login(String username, String password) {
         Owner owner = getOwnerByUsername(username);
-        if (owner == null) {
-            return null;
-        }
         if (!passwordEncoder.matches(password, owner.getPassword())) {
-            return null;
+            throw new ApiException("用户名或密码错误");
         }
         return jwtUtil.builtToken(username);
     }
@@ -84,6 +74,7 @@ public class OwnerServiceImpl implements OwnerService {
     public Owner getCurrentOwner() {
         OwnerDetails details = (OwnerDetails) SecurityContextHolder
                 .getContext().getAuthentication().getPrincipal();
+        Assert.notNull(details, "获取验证上下文失败");
         return details.getOwner();
     }
 
@@ -91,7 +82,7 @@ public class OwnerServiceImpl implements OwnerService {
     public int updatePassword(PasswordParam passwordParam) {
         String encodeOldPassword = getCurrentOwner().getPassword();
         if (!passwordEncoder.matches(passwordParam.getOldPassword(), encodeOldPassword)) {
-            return 0;
+            throw new ApiException("旧密码错误");
         }
         return ownerRepository.updatePassword(
                 passwordEncoder.encode(passwordParam.getNewPassword()),getCurrentOwnerId());
@@ -106,20 +97,26 @@ public class OwnerServiceImpl implements OwnerService {
     @Override
     public int uploadAvatar(MultipartFile file) {
         String imageContentTypePrefix = "image/";
-        if (!file.getContentType().startsWith(imageContentTypePrefix)) {
-            return 0;
+        if (file.getContentType() == null
+                || !file.getContentType().startsWith(imageContentTypePrefix)) {
+            throw new ApiException("不被允许的文件类型");
         }
         String storageKey = fileStorageService.putFile(file);
-        if (storageKey == null) {
-            return 0;
-        }
         String host;
         try {
             host = InetAddress.getLocalHost().getHostAddress();
         } catch (Exception e) {
-            return 0;
+            throw new ApiException("服务器异常");
         }
         String avatarUrl = "http://" + host + ":8080" + FILE_DOWNLOAD_URL + storageKey;
         return ownerRepository.updateAvatar(avatarUrl, getCurrentOwnerId());
+    }
+
+    private Owner getOwnerByUsername(String name) {
+        Optional<Owner> optionalOwner = ownerRepository.findByUsername(name);
+        if (!optionalOwner.isPresent()) {
+            throw new ApiException("用户不存在");
+        }
+        return optionalOwner.get();
     }
 }

@@ -12,5 +12,4 @@ public class PanApplicationTests {
     @Test
     public void contextLoads() {
     }
-
 }

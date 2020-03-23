@@ -2,7 +2,7 @@ package com.haylen.pan.controller;
 
 import com.haylen.pan.dto.CommonResult;
 import com.haylen.pan.dto.OwnerInfo;
-import com.haylen.pan.dto.OwnerParam;
+import com.haylen.pan.dto.RegisterParam;
 import com.haylen.pan.dto.PasswordParam;
 import com.haylen.pan.entity.Owner;
 import com.haylen.pan.service.OwnerService;
@@ -24,8 +24,8 @@ public class OwnerController {
     private OwnerService ownerService;
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
-    public CommonResult register(@Valid @RequestBody OwnerParam ownerParam) {
-        if (ownerService.register(ownerParam) == null) {
+    public CommonResult register(@Valid @RequestBody RegisterParam registerParam) {
+        if (ownerService.register(registerParam) == null) {
             return CommonResult.failed();
         }
         return CommonResult.success();

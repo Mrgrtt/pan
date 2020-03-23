@@ -1,6 +1,7 @@
 package com.haylen.pan.component;
 
 import com.haylen.pan.dto.CommonResult;
+import com.haylen.pan.exception.ApiException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -32,6 +33,10 @@ public class GlobalExceptionHandler {
             return CommonResult.validateFailed(((BindException)e)
                     .getBindingResult().getFieldError().getDefaultMessage());
         }
+        if (e instanceof MethodArgumentNotValidException){
+            return CommonResult.validateFailed(((MethodArgumentNotValidException)e)
+                    .getBindingResult().getFieldError().getDefaultMessage());
+        }
         return CommonResult.validateFailed();
     }
 
@@ -39,6 +44,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public CommonResult handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
         return CommonResult.methodNotAllowed();
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(ApiException.class)
+    public CommonResult handleResourceException(Exception e) {
+        return CommonResult.failed(e.getMessage());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

@@ -2,6 +2,7 @@ package com.haylen.pan.service.impl;
 
 import com.haylen.pan.entity.Folder;
 import com.haylen.pan.entity.File;
+import com.haylen.pan.exception.ApiException;
 import com.haylen.pan.repository.FolderRepository;
 import com.haylen.pan.service.FolderService;
 import com.haylen.pan.service.FileService;
@@ -31,13 +32,13 @@ public class FolderServiceImpl implements FolderService {
 
     @Override
     public Folder create(Long parentId, String name){
-        /* 父目录是否存在 */
+        /* 父目录不存在 */
         if (notExisted(parentId)) {
-            return null;
+            throw new ApiException("父目录不存在");
         }
-        /* 该目录是否已经存在 */
+        /* 存在同名目录 */
         if (existedChildFolder(parentId, name)) {
-            return null;
+            throw new ApiException("存在同名目录");
         }
         Folder folder = new Folder();
         folder.setName(name);
@@ -58,22 +59,22 @@ public class FolderServiceImpl implements FolderService {
     public int move(Long newParentId, Long id){
         /* 禁止将自身设为其父目录 */
         if (newParentId.equals(id)) {
-            return 0;
+            throw new ApiException("禁止将自身设为其父目录");
         }
-        /* 该父目录是否存在 */
+        /* 该父目录不存在 */
         if (notExisted(newParentId)) {
-            return 0;
+            throw new ApiException("父目录不存在");
         }
         Optional<Folder> optionalFolder = folderRepository.findById(id);
         if (!optionalFolder.isPresent()) {
-            return 0;
+            throw new ApiException("不存在该目录");
         }
         if(optionalFolder.get().getParentId().equals(newParentId)) {
             return 1;
         }
         /* 该目录是否已经存在 */
         if (existedChildFolder(newParentId, optionalFolder.get().getName())) {
-            return 0;
+            throw new ApiException("存在同名目录");
         }
         return folderRepository.updateParent(newParentId, id, ownerService.getCurrentOwnerId());
     }
@@ -82,14 +83,13 @@ public class FolderServiceImpl implements FolderService {
     public int rename(String newName, Long id) {
         Optional<Folder> optionalFolder = folderRepository.findById(id);
         if (!optionalFolder.isPresent()) {
-            return 0;
+            throw new ApiException("不存在该目录");
         }
         if (optionalFolder.get().getName().equals(newName)) {
             return 1;
         }
-        /* 该目录是否已经存在 */
         if (existedChildFolder(optionalFolder.get().getParentId(), newName)) {
-            return 0;
+            throw new ApiException("存在同名目录");
         }
         return folderRepository.updateName(newName, id, ownerService.getCurrentOwnerId());
     }
@@ -125,7 +125,7 @@ public class FolderServiceImpl implements FolderService {
         Optional<Folder> optionalFolder = folderRepository
                 .findFolderByIdAndOwnerId(id, ownerService.getCurrentOwnerId());
         if (!optionalFolder.isPresent()) {
-            return 0;
+            throw new ApiException("不存在该目录");
         }
         Folder folder = copy(toFolderId, optionalFolder.get());
         folder = folderRepository.saveAndFlush(folder);
