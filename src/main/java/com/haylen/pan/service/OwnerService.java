@@ -1,6 +1,7 @@
 package com.haylen.pan.service;
 
 import com.haylen.pan.bo.OwnerDetails;
+import com.haylen.pan.dto.LoginParam;
 import com.haylen.pan.dto.RegisterParam;
 import com.haylen.pan.dto.PasswordParam;
 import com.haylen.pan.entity.Owner;
@@ -25,8 +26,9 @@ public interface OwnerService {
 
     /**
      * 登录
+     * @return token
      */
-    String login(String username, String password);
+    String login(LoginParam loginParam);
 
     /**
      * 获取现在登录的用户

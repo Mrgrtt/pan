@@ -33,7 +33,10 @@ public class CaptchaController {
     }
 
     @RequestMapping(value = "/email/{token}", method = RequestMethod.POST)
-    public void emailCaptcha(@PathVariable String token, @RequestParam @Email String email) {
+    public CommonResult emailCaptcha(@PathVariable String token,
+                                     @RequestParam @Email String email) {
+        captchaService.sendEmailCaptcha(email, token);
+        return CommonResult.success();
     }
 
     @RequestMapping("/verify/{token}")

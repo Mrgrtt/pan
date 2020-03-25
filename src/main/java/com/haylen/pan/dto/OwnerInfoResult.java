@@ -7,7 +7,7 @@ import lombok.Data;
  * @date 2020-03-06
  */
 @Data
-public class OwnerInfo {
+public class OwnerInfoResult {
     private String name;
     private String avatar;
 }

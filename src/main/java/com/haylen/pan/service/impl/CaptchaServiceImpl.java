@@ -40,6 +40,7 @@ public class CaptchaServiceImpl implements CaptchaService {
 
     @Override
     public void sendEmailCaptcha(String email, String token) {
+        throw new ApiException("接口未实现");
     }
 
     @Override

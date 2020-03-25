@@ -1,11 +1,13 @@
 package com.haylen.pan.service.impl;
 
 import com.haylen.pan.bo.OwnerDetails;
+import com.haylen.pan.dto.LoginParam;
 import com.haylen.pan.dto.RegisterParam;
 import com.haylen.pan.dto.PasswordParam;
 import com.haylen.pan.entity.Owner;
 import com.haylen.pan.exception.ApiException;
 import com.haylen.pan.repository.OwnerRepository;
+import com.haylen.pan.service.CaptchaService;
 import com.haylen.pan.service.FileStorageService;
 import com.haylen.pan.service.OwnerService;
 import com.haylen.pan.util.JwtUtil;
@@ -34,6 +36,8 @@ public class OwnerServiceImpl implements OwnerService {
     private JwtUtil jwtUtil;
     @Autowired
     private FileStorageService fileStorageService;
+    @Autowired
+    private CaptchaService captchaService;
 
     private final static String FILE_DOWNLOAD_URL = "/file/download/";
 
@@ -50,19 +54,21 @@ public class OwnerServiceImpl implements OwnerService {
         Owner owner = new Owner();
         owner.setUsername(registerParam.getUsername());
         String encodedPassword = passwordEncoder.encode(registerParam.getPassword());
-        registerParam = null;
         owner.setPassword(encodedPassword);
         owner.setGmtModified(LocalDateTime.now());
         return ownerRepository.save(owner);
     }
 
     @Override
-    public String login(String username, String password) {
-        Owner owner = getOwnerByUsername(username);
-        if (!passwordEncoder.matches(password, owner.getPassword())) {
+    public String login(LoginParam loginParam) {
+        if (!captchaService.verify(loginParam.getToken(), loginParam.getCaptcha())) {
+            throw new ApiException("验证码错误");
+        }
+        Owner owner = getOwnerByUsername(loginParam.getUsername());
+        if (!passwordEncoder.matches(loginParam.getPassword(), owner.getPassword())) {
             throw new ApiException("用户名或密码错误");
         }
-        return jwtUtil.builtToken(username);
+        return jwtUtil.builtToken(loginParam.getUsername());
     }
 
     @Override

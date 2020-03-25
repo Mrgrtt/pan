@@ -38,7 +38,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/owner/login*",
             "/file/download/*",
             "/owner/isRegister*",
-            "/captcha/*"
+            "/captcha/**"
     };
 
     @Override

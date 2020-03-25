@@ -1,9 +1,6 @@
 package com.haylen.pan.controller;
 
-import com.haylen.pan.dto.CommonResult;
-import com.haylen.pan.dto.OwnerInfo;
-import com.haylen.pan.dto.RegisterParam;
-import com.haylen.pan.dto.PasswordParam;
+import com.haylen.pan.dto.*;
 import com.haylen.pan.entity.Owner;
 import com.haylen.pan.service.OwnerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +29,8 @@ public class OwnerController {
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public CommonResult login(@RequestParam @NotEmpty String username,
-                              @RequestParam @NotEmpty String password) {
-        String token = ownerService.login(username, password);
+    public CommonResult login(@Valid LoginParam loginParam) {
+        String token = ownerService.login(loginParam);
         if (token == null) {
             return CommonResult.failed();
         }
@@ -57,7 +53,7 @@ public class OwnerController {
     @RequestMapping("/info")
     public CommonResult getInfo() {
         Owner owner = ownerService.getCurrentOwner();
-        OwnerInfo ownerInfo = new OwnerInfo();
+        OwnerInfoResult ownerInfo = new OwnerInfoResult();
         ownerInfo.setName(owner.getUsername());
         ownerInfo.setAvatar(owner.getAvatar());
         return CommonResult.success(ownerInfo);
