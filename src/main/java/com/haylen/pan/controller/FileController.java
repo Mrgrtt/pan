@@ -3,6 +3,8 @@ package com.haylen.pan.controller;
 import com.haylen.pan.dto.CommonResult;
 import com.haylen.pan.entity.File;
 import com.haylen.pan.service.FileService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -15,6 +17,7 @@ import javax.validation.constraints.NotEmpty;
 import java.io.*;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 /**
  * @author haylen
@@ -22,10 +25,12 @@ import java.nio.charset.StandardCharsets;
  */
 @RestController
 @RequestMapping("/file")
+@Api(tags = "FileController", value = "文件管理")
 public class FileController {
     @Autowired
     private FileService fileService;
 
+    @ApiOperation("上传文件")
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
     public CommonResult upload(@RequestPart MultipartFile file,
                                @RequestParam(defaultValue = "0") Long folderId) {
@@ -36,7 +41,8 @@ public class FileController {
         return CommonResult.success(result);
     }
 
-    @RequestMapping("/download/{key}")
+    @ApiOperation("下载文件（无需登陆)")
+    @RequestMapping(value = "/download/{key}", method = RequestMethod.GET)
     public ResponseEntity<StreamingResponseBody> download(@PathVariable String key,
                         @RequestHeader(name = "Range", required = false) String rangeHeader){
         InputStream inputStream = fileService.download(key);
@@ -100,11 +106,13 @@ public class FileController {
                 .body(streamingResponseBody);
     }
 
-    @RequestMapping("/list/{folderId}")
-    public CommonResult list(@PathVariable Long folderId) {
+    @ApiOperation("获取文件夹下的文件列表")
+    @RequestMapping(value = "/list/{folderId}", method = RequestMethod.GET)
+    public CommonResult<List<File>> list(@PathVariable Long folderId) {
         return CommonResult.success(fileService.listFile(folderId));
     }
 
+    @ApiOperation("重命名文件")
     @RequestMapping(value = "/rename/{id}", method = RequestMethod.POST)
     public CommonResult rename(@RequestParam @NotEmpty String newName,
                                @PathVariable Long id) {
@@ -114,6 +122,7 @@ public class FileController {
         return CommonResult.success();
     }
 
+    @ApiOperation("移动文件")
     @RequestMapping(value = "/move/{id}", method = RequestMethod.POST)
     public CommonResult move(@RequestParam Long newFolderId, @PathVariable Long id) {
         if (fileService.move(newFolderId, id) <= 0) {
@@ -122,17 +131,20 @@ public class FileController {
         return CommonResult.success();
     }
 
+    @ApiOperation("删除文件")
     @RequestMapping(value = "/delete/{id}", method = RequestMethod.POST)
     public CommonResult delete(@PathVariable Long id) {
         fileService.delete(id);
         return CommonResult.success();
     }
 
-    @RequestMapping("/existed")
-    public CommonResult existed(@RequestParam Long folderId, @RequestParam @NotEmpty String name) {
+    @ApiOperation("指定目录下是否存在指定文件")
+    @RequestMapping(value = "/existed", method = RequestMethod.GET)
+    public CommonResult<Boolean> existed(@RequestParam Long folderId, @RequestParam @NotEmpty String name) {
         return CommonResult.success(fileService.isExisted(folderId, name));
     }
 
+    @ApiOperation("复制文件")
     @RequestMapping(value = "/copy/{id}", method = RequestMethod.POST)
     public CommonResult copy(@RequestParam Long toFolderId, @PathVariable Long id) {
         File file = fileService.copy(toFolderId, id);

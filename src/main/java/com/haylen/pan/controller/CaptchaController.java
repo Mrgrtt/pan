@@ -3,6 +3,8 @@ package com.haylen.pan.controller;
 import com.haylen.pan.dto.CommonResult;
 import com.haylen.pan.exception.ApiException;
 import com.haylen.pan.service.CaptchaService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,11 +18,13 @@ import java.io.IOException;
  */
 @RestController
 @RequestMapping("/captcha")
+@Api(tags = "CaptchaController", value = "验证码管理")
 public class CaptchaController {
     @Autowired
     private CaptchaService captchaService;
 
-    @RequestMapping("/image/{token}")
+    @ApiOperation("获取图片验证码")
+    @RequestMapping(value = "/image/{token}", method = RequestMethod.GET)
     public void imageBuild(@PathVariable String token, HttpServletResponse response) {
         String imageType = "image/jpeg";
         response.setContentType(imageType);
@@ -32,6 +36,7 @@ public class CaptchaController {
         }
     }
 
+    @ApiOperation("发送邮箱验证码")
     @RequestMapping(value = "/email/{token}", method = RequestMethod.POST)
     public CommonResult emailCaptcha(@PathVariable String token,
                                      @RequestParam @Email String email) {
@@ -39,8 +44,9 @@ public class CaptchaController {
         return CommonResult.success();
     }
 
-    @RequestMapping("/verify/{token}")
-    public CommonResult verify(@PathVariable String token, @RequestParam String captcha) {
+    @ApiOperation("验证验证码")
+    @RequestMapping(value = "/verify/{token}", method = RequestMethod.GET)
+    public CommonResult<Boolean> verify(@PathVariable String token, @RequestParam String captcha) {
         return CommonResult.success(captchaService.verify(token, captcha));
     }
 }

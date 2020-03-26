@@ -3,6 +3,8 @@ package com.haylen.pan.controller;
 import com.haylen.pan.dto.*;
 import com.haylen.pan.entity.Owner;
 import com.haylen.pan.service.OwnerService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,10 +18,12 @@ import javax.validation.constraints.NotEmpty;
  */
 @RestController
 @RequestMapping("/owner")
+@Api(tags = "OwnerController", value = "用户管理")
 public class OwnerController {
     @Autowired
     private OwnerService ownerService;
 
+    @ApiOperation("注册")
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     public CommonResult register(@Valid @RequestBody RegisterParam registerParam) {
         if (ownerService.register(registerParam) == null) {
@@ -28,8 +32,9 @@ public class OwnerController {
         return CommonResult.success();
     }
 
+    @ApiOperation("登陆")
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public CommonResult login(@Valid LoginParam loginParam) {
+    public CommonResult<String> login(@Valid LoginParam loginParam) {
         String token = ownerService.login(loginParam);
         if (token == null) {
             return CommonResult.failed();
@@ -37,6 +42,7 @@ public class OwnerController {
         return CommonResult.success(token);
     }
 
+    @ApiOperation("修改密码")
     @RequestMapping(value = "/update/password", method = RequestMethod.POST)
     public CommonResult changePassword(@Valid @RequestBody PasswordParam passwordParam) {
         if (ownerService.updatePassword(passwordParam) <= 0) {
@@ -45,13 +51,15 @@ public class OwnerController {
         return CommonResult.success();
     }
 
-    @RequestMapping("/isRegistered")
-    public CommonResult isRegistered(@RequestParam @NotEmpty String username) {
+    @ApiOperation("指定用户名是否已被注册")
+    @RequestMapping(value = "/isRegistered", method = RequestMethod.GET)
+    public CommonResult<Boolean> isRegistered(@RequestParam @NotEmpty String username) {
         return CommonResult.success(ownerService.isRegistered(username));
     }
 
-    @RequestMapping("/info")
-    public CommonResult getInfo() {
+    @ApiOperation("获取用户信息")
+    @RequestMapping(value = "/info", method = RequestMethod.GET)
+    public CommonResult<OwnerInfoResult> getInfo() {
         Owner owner = ownerService.getCurrentOwner();
         OwnerInfoResult ownerInfo = new OwnerInfoResult();
         ownerInfo.setName(owner.getUsername());
@@ -59,6 +67,7 @@ public class OwnerController {
         return CommonResult.success(ownerInfo);
     }
 
+    @ApiOperation("上传头像")
     @RequestMapping(value = "/avatar/upload", method = RequestMethod.POST)
     public CommonResult uploadAvatar(MultipartFile file) {
         if (ownerService.uploadAvatar(file) <= 0) {

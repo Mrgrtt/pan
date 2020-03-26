@@ -38,7 +38,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/owner/login*",
             "/file/download/*",
             "/owner/isRegister*",
-            "/captcha/**"
+            "/captcha/**",
+            "/swagger-ui.html",
+            "/swagger-resources/**", "" +
+            "/swagger/**",
+            "/**/v2/api-docs",
+            "/webjars/springfox-swagger-ui/**"
     };
 
     @Override
