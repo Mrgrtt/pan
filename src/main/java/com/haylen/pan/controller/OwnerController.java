@@ -1,7 +1,7 @@
 package com.haylen.pan.controller;
 
-import com.haylen.pan.dto.*;
-import com.haylen.pan.entity.Owner;
+import com.haylen.pan.domain.dto.*;
+import com.haylen.pan.domain.entity.Owner;
 import com.haylen.pan.service.OwnerService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

@@ -1,7 +1,7 @@
 package com.haylen.pan.component;
 
 import cn.hutool.json.JSONUtil;
-import com.haylen.pan.dto.CommonResult;
+import com.haylen.pan.domain.dto.CommonResult;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 

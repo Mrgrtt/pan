@@ -1,10 +1,10 @@
 package com.haylen.pan.service;
 
 import com.haylen.pan.bo.OwnerDetails;
-import com.haylen.pan.dto.LoginParam;
-import com.haylen.pan.dto.RegisterParam;
-import com.haylen.pan.dto.PasswordParam;
-import com.haylen.pan.entity.Owner;
+import com.haylen.pan.domain.dto.LoginParam;
+import com.haylen.pan.domain.dto.RegisterParam;
+import com.haylen.pan.domain.dto.PasswordParam;
+import com.haylen.pan.domain.entity.Owner;
 import org.springframework.web.multipart.MultipartFile;
 
 /**

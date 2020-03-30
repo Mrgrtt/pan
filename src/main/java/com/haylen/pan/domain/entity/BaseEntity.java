@@ -1,4 +1,4 @@
-package com.haylen.pan.entity;
+package com.haylen.pan.domain.entity;
 
 import lombok.Data;
 

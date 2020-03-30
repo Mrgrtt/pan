@@ -1,10 +1,10 @@
-package com.haylen.pan.entity;
+package com.haylen.pan.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 /**
  * 文件夹
@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "folder")
 public class Folder extends BaseEntity{
+
     @Column(name = "owner_id", columnDefinition = "bigint unsigned", nullable = false)
     private Long ownerId;
 
@@ -27,4 +28,11 @@ public class Folder extends BaseEntity{
 
     @Column(name = "name", columnDefinition = "varchar(64)", nullable = false)
     private String name;
+
+    /**
+     * 删除标志， 1->已删除 0->未删除
+     */
+    @JsonIgnore
+    @Column(columnDefinition = "tinyint unsigned default 0", nullable = false)
+    private Integer deleted;
 }

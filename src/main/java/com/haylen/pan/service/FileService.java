@@ -1,6 +1,6 @@
 package com.haylen.pan.service;
 
-import com.haylen.pan.entity.File;
+import com.haylen.pan.domain.entity.File;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;

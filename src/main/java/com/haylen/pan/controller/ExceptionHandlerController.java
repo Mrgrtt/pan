@@ -1,6 +1,6 @@
 package com.haylen.pan.controller;
 
-import com.haylen.pan.dto.CommonResult;
+import com.haylen.pan.domain.dto.CommonResult;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;

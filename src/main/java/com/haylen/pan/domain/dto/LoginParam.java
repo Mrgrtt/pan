@@ -1,4 +1,4 @@
-package com.haylen.pan.dto;
+package com.haylen.pan.domain.dto;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

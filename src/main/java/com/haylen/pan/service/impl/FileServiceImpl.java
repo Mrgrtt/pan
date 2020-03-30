@@ -1,6 +1,6 @@
 package com.haylen.pan.service.impl;
 
-import com.haylen.pan.entity.File;
+import com.haylen.pan.domain.entity.File;
 import com.haylen.pan.exception.ApiException;
 import com.haylen.pan.repository.FileRepository;
 import com.haylen.pan.service.FolderService;
@@ -8,7 +8,6 @@ import com.haylen.pan.service.FileService;
 import com.haylen.pan.service.FileStorageService;
 import com.haylen.pan.service.OwnerService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

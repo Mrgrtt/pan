@@ -1,6 +1,6 @@
 package com.haylen.pan.bo;
 
-import com.haylen.pan.entity.Owner;
+import com.haylen.pan.domain.entity.Owner;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

@@ -1,6 +1,6 @@
 package com.haylen.pan.repository;
 
-import com.haylen.pan.entity.File;
+import com.haylen.pan.domain.entity.File;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -53,7 +53,7 @@ public interface FileRepository extends JpaRepository<File, Long> {
      */
     @Modifying
     @Transactional(rollbackFor = Exception.class)
-    @Query("update File f set f.deleted = 1 where f.id = ?1 and f.ownerId = ?2")
+    @Query("update File f set f.deleted = 1, f.gmtModified = current_timestamp where f.id = ?1 and f.ownerId = ?2")
     int delete(Long id, Long ownerId);
 
     /**

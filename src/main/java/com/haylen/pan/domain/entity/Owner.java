@@ -1,11 +1,9 @@
-package com.haylen.pan.entity;
+package com.haylen.pan.domain.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 /**
  * @author haylen

@@ -1,7 +1,7 @@
 package com.haylen.pan.service.impl;
 
-import com.haylen.pan.entity.Folder;
-import com.haylen.pan.entity.File;
+import com.haylen.pan.domain.entity.Folder;
+import com.haylen.pan.domain.entity.File;
 import com.haylen.pan.exception.ApiException;
 import com.haylen.pan.repository.FolderRepository;
 import com.haylen.pan.service.FolderService;
@@ -51,8 +51,7 @@ public class FolderServiceImpl implements FolderService {
     @Override
     public List<Folder> listChildFolder(Long id) {
         return folderRepository.
-                findFoldersByParentIdAndOwnerId(id,
-                        ownerService.getCurrentOwnerId());
+                listChildFolder(id, ownerService.getCurrentOwnerId());
     }
 
     @Override
@@ -96,7 +95,8 @@ public class FolderServiceImpl implements FolderService {
 
     @Override
     public boolean notExisted(Long id) {
-        Optional<Folder> folderOptional = folderRepository.findFolderByIdAndOwnerId(id, ownerService.getCurrentOwnerId());
+        Optional<Folder> folderOptional =
+                folderRepository.getFolder(id, ownerService.getCurrentOwnerId());
         if (id !=0 && !folderOptional.isPresent()) {
             return true;
         }
@@ -117,13 +117,13 @@ public class FolderServiceImpl implements FolderService {
         for (Folder child: folders) {
             delete(child.getId());
         }
-        folderRepository.deleteById(id);
+        folderRepository.delete(id, ownerService.getCurrentOwnerId());
     }
 
     @Override
     public int copy(Long id, Long toFolderId) {
-        Optional<Folder> optionalFolder = folderRepository
-                .findFolderByIdAndOwnerId(id, ownerService.getCurrentOwnerId());
+        Optional<Folder> optionalFolder =
+                folderRepository.getFolder(id, ownerService.getCurrentOwnerId());
         if (!optionalFolder.isPresent()) {
             throw new ApiException("不存在该目录");
         }
@@ -157,8 +157,7 @@ public class FolderServiceImpl implements FolderService {
     @Override
     public Boolean existedChildFolder(Long id, String name) {
         Optional<Folder> folderOptional =
-                folderRepository.findFolderByParentIdAndNameAndOwnerId(
-                        id, name, ownerService.getCurrentOwnerId());
+                folderRepository.getFolder(id, name, ownerService.getCurrentOwnerId());
         return folderOptional.isPresent();
     }
 }

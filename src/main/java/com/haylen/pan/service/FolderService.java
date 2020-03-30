@@ -1,6 +1,6 @@
 package com.haylen.pan.service;
 
-import com.haylen.pan.entity.Folder;
+import com.haylen.pan.domain.entity.Folder;
 
 import java.util.List;
 

@@ -1,6 +1,6 @@
 package com.haylen.pan.repository;
 
-import com.haylen.pan.entity.Folder;
+import com.haylen.pan.domain.entity.Folder;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -15,16 +15,17 @@ import java.util.Optional;
  */
 public interface FolderRepository extends JpaRepository<Folder, Long> {
     /**
-     * 获取指定目录的子文件夹
+     * 获取指定文件夹的子文件夹
      */
-    List<Folder> findFoldersByParentIdAndOwnerId(Long parentId, Long ownerId);
+    @Query("select f from Folder f where f.parentId = ?1 and f.ownerId = ?2 and f.ownerId = 0")
+    List<Folder> listChildFolder(Long parentId, Long ownerId);
 
     /**
      * 更改父文件夹
      */
     @Modifying
     @Transactional(rollbackFor = Exception.class)
-    @Query("update Folder c set c.parentId = ?1, c.gmtModified = current_timestamp where c.id = ?2 and c.ownerId = ?3")
+    @Query("update Folder c set c.parentId = ?1, c.gmtModified = current_timestamp where c.id = ?2 and c.ownerId = ?3 and c.deleted = 0")
     int updateParent(Long newParentId, Long id, Long ownerId);
 
     /**
@@ -32,16 +33,26 @@ public interface FolderRepository extends JpaRepository<Folder, Long> {
      */
     @Modifying
     @Transactional(rollbackFor = Exception.class)
-    @Query("update Folder c set c.name = ?1, c.gmtModified = current_timestamp where c.id = ?2 and c.ownerId = ?3")
+    @Query("update Folder c set c.name = ?1, c.gmtModified = current_timestamp where c.id = ?2 and c.ownerId = ?3 and c.deleted = 0")
     int updateName(String newName, Long id, Long ownerId);
 
     /**
      * 查找文件夹通过id
      */
-    Optional<Folder> findFolderByIdAndOwnerId(Long id, Long ownerId);
+    @Query("select f from Folder f where f.id = ?1 and f.ownerId = ?2 and f.deleted = 0")
+    Optional<Folder> getFolder(Long id, Long ownerId);
 
     /**
      * 是否存在该名字的子文件夹
      */
-    Optional<Folder> findFolderByParentIdAndNameAndOwnerId(Long parentId, String name, Long ownerId);
+    @Query("select f from Folder f where f.parentId = ?1 and f.name = ?2 and f.ownerId = ?3 and f.deleted = 0")
+    Optional<Folder> getFolder(Long parentId, String name, Long ownerId);
+
+    /**
+     * 删除
+     */
+    @Modifying
+    @Transactional(rollbackFor = Exception.class)
+    @Query("update Folder f set f.deleted = 1, f.gmtModified = current_timestamp where f.id = ?1 and f.ownerId = ?2")
+    void delete(Long id, Long ownerId);
 }

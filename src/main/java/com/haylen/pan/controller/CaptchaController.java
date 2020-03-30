@@ -1,6 +1,6 @@
 package com.haylen.pan.controller;
 
-import com.haylen.pan.dto.CommonResult;
+import com.haylen.pan.domain.dto.CommonResult;
 import com.haylen.pan.exception.ApiException;
 import com.haylen.pan.service.CaptchaService;
 import io.swagger.annotations.Api;

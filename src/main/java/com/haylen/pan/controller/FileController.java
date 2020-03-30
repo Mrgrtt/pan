@@ -1,7 +1,7 @@
 package com.haylen.pan.controller;
 
-import com.haylen.pan.dto.CommonResult;
-import com.haylen.pan.entity.File;
+import com.haylen.pan.domain.dto.CommonResult;
+import com.haylen.pan.domain.entity.File;
 import com.haylen.pan.service.FileService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

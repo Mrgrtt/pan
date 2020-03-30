@@ -1,6 +1,6 @@
 package com.haylen.pan.component;
 
-import com.haylen.pan.dto.CommonResult;
+import com.haylen.pan.domain.dto.CommonResult;
 import com.haylen.pan.exception.ApiException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
