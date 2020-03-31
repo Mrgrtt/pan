@@ -61,15 +61,12 @@ public class OwnerController {
     @RequestMapping(value = "/info", method = RequestMethod.GET)
     public CommonResult<OwnerInfoResult> getInfo() {
         Owner owner = ownerService.getCurrentOwner();
-        OwnerInfoResult ownerInfo = new OwnerInfoResult();
-        ownerInfo.setName(owner.getUsername());
-        ownerInfo.setAvatar(owner.getAvatar());
-        return CommonResult.success(ownerInfo);
+        return CommonResult.success(OwnerInfoResult.valueOf(owner));
     }
 
     @ApiOperation("上传头像")
     @RequestMapping(value = "/avatar/upload", method = RequestMethod.POST)
-    public CommonResult uploadAvatar(MultipartFile file) {
+    public CommonResult uploadAvatar(@RequestPart MultipartFile file) {
         if (ownerService.uploadAvatar(file) <= 0) {
             return CommonResult.failed();
         }

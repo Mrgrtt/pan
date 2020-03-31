@@ -12,6 +12,7 @@ import com.haylen.pan.service.FileStorageService;
 import com.haylen.pan.service.OwnerService;
 import com.haylen.pan.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,8 @@ public class OwnerServiceImpl implements OwnerService {
     private FileStorageService fileStorageService;
     @Autowired
     private CaptchaService captchaService;
+    @Value("${owner-total-space-default}")
+    private Long totalSpaceDefault;
 
     private final static String FILE_DOWNLOAD_URL = "/file/download/";
 
@@ -56,6 +59,9 @@ public class OwnerServiceImpl implements OwnerService {
         String encodedPassword = passwordEncoder.encode(registerParam.getPassword());
         owner.setPassword(encodedPassword);
         owner.setGmtModified(LocalDateTime.now());
+        owner.setTotalStorageSpace(totalSpaceDefault);
+        owner.setUsedStorageSpace(0L);
+        owner.setAvatar("");
         return ownerRepository.save(owner);
     }
 

@@ -24,7 +24,9 @@ spring:
         max-idle: 1000
         max-wait: 6000ms
         min-idle: 4
+jwt:
+  expiration: 864000 #10天 单位秒
 
-file:
-  storage:
-    path: D:/panFile/
+file-storage-path: D:/panFile/
+
+owner-total-space-default: 10737418240 #10GB 默认用户存储空间大小(byte)

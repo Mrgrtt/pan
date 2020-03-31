@@ -35,4 +35,26 @@ public interface OwnerRepository extends JpaRepository<Owner, Long> {
     @Transactional(rollbackFor = Exception.class)
     @Query("update Owner o set o.avatar = ?1, o.gmtModified = current_timestamp where id = ?2")
     int updateAvatar(String avatar, Long id);
+
+    /**
+     *获取已用存储空间
+     */
+    @Query("select o.usedStorageSpace from Owner o where o.id = ?1")
+    Long getUsedStorageSpace(Long id);
+
+    /**
+     * 增加已用空间
+     */
+    @Modifying
+    @Transactional(rollbackFor = Exception.class)
+    @Query("update Owner o set o.usedStorageSpace = o.usedStorageSpace + ?1 where o.id = ?2")
+    int increaseUsedStorageSpace(Long size, Long id);
+
+    /**
+     * 减少已用空间
+     */
+    @Modifying
+    @Transactional(rollbackFor = Exception.class)
+    @Query("update Owner o set o.usedStorageSpace = o.usedStorageSpace - ?1 where o.id = ?2")
+    int reduceUsedStorageSpace(Long size, Long id);
 }

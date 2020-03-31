@@ -1,6 +1,7 @@
 package com.haylen.pan.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -22,6 +23,7 @@ public class File extends BaseEntity {
     @Column(name = "folder_id", columnDefinition = "bigint unsigned default 0")
     private Long folderId;
 
+    @JsonIgnore
     @Column(name = "owner_id", columnDefinition = "bigint unsigned", nullable = false)
     private Long ownerId;
 

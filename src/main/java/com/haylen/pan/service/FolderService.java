@@ -1,6 +1,7 @@
 package com.haylen.pan.service;
 
 import com.haylen.pan.domain.entity.Folder;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -38,6 +39,7 @@ public interface FolderService {
     /**
      * 删除文件夹及其子文件夹和文件
      */
+    @Transactional()
     void delete(Long id);
 
     /**

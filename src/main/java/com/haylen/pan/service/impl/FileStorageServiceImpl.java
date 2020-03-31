@@ -21,7 +21,7 @@ import java.nio.file.Paths;
 @Service
 @Slf4j
 public class FileStorageServiceImpl implements FileStorageService {
-    @Value("${file.storage.path}")
+    @Value("${file-storage-path}")
     private String fileStoragePath;
 
     @Override

@@ -45,6 +45,7 @@ public class FolderServiceImpl implements FolderService {
         folder.setGmtModified(LocalDateTime.now());
         folder.setParentId(parentId);
         folder.setOwnerId(ownerService.getCurrentOwnerId());
+        folder.setDeleted(0);
         return folderRepository.save(folder);
     }
 
@@ -125,8 +126,21 @@ public class FolderServiceImpl implements FolderService {
         Optional<Folder> optionalFolder =
                 folderRepository.getFolder(id, ownerService.getCurrentOwnerId());
         if (!optionalFolder.isPresent()) {
-            throw new ApiException("不存在该目录");
+            throw new ApiException("不存在该文件夹");
         }
+        if (notExisted(toFolderId)) {
+            throw new ApiException("目标文件夹不存在");
+        }
+        if (existedChildFolder(toFolderId, optionalFolder.get().getName())) {
+            throw new ApiException("存在同名目录");
+        }
+
+        /*
+         * 需要在这里先获取子文件夹列表，避免自我复制时（参数id == toFolderId）
+         * 无限循环。
+         */
+        List<Folder> folders = listChildFolder(id);
+
         Folder folder = copy(toFolderId, optionalFolder.get());
         folder = folderRepository.saveAndFlush(folder);
 
@@ -137,7 +151,6 @@ public class FolderServiceImpl implements FolderService {
         }
 
         /* 复制子文件夹 */
-        List<Folder> folders = listChildFolder(id);
         for (Folder f: folders) {
             copy(f.getId(), folder.getId());
         }
@@ -151,6 +164,7 @@ public class FolderServiceImpl implements FolderService {
         folder.setParentId(parentId);
         folder.setGmtCreate(LocalDateTime.now());
         folder.setGmtModified(LocalDateTime.now());
+        folder.setDeleted(oldFolder.getDeleted());
         return folder;
     }
 

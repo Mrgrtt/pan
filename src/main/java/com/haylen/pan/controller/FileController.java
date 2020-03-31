@@ -14,7 +14,10 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import javax.validation.constraints.NotEmpty;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -109,6 +112,7 @@ public class FileController {
     @ApiOperation("获取文件夹下的文件列表")
     @RequestMapping(value = "/list/{folderId}", method = RequestMethod.GET)
     public CommonResult<List<File>> list(@PathVariable Long folderId) {
+        // todo: swagger ui 上显示错误的File类
         return CommonResult.success(fileService.listFile(folderId));
     }
 

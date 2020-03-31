@@ -17,6 +17,7 @@ import javax.persistence.*;
 @Table(name = "folder")
 public class Folder extends BaseEntity{
 
+    @JsonIgnore
     @Column(name = "owner_id", columnDefinition = "bigint unsigned", nullable = false)
     private Long ownerId;
 

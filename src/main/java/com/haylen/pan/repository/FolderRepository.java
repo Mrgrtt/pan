@@ -17,7 +17,7 @@ public interface FolderRepository extends JpaRepository<Folder, Long> {
     /**
      * 获取指定文件夹的子文件夹
      */
-    @Query("select f from Folder f where f.parentId = ?1 and f.ownerId = ?2 and f.ownerId = 0")
+    @Query("select f from Folder f where f.parentId = ?1 and f.ownerId = ?2 and f.deleted = 0")
     List<Folder> listChildFolder(Long parentId, Long ownerId);
 
     /**

@@ -1,6 +1,7 @@
 package com.haylen.pan.service;
 
 import com.haylen.pan.domain.entity.File;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
@@ -18,6 +19,7 @@ public interface FileService {
      * @param folderId 上传到的目录id
      * @return 文件
      */
+    @Transactional(rollbackFor = Exception.class)
     File upload(MultipartFile multipartFile, Long folderId);
 
     /**
@@ -61,6 +63,7 @@ public interface FileService {
      * @param id 文件id
      * @return 结果
      */
+    @Transactional(rollbackFor = Exception.class)
     void delete(Long id);
 
     /**
@@ -71,5 +74,6 @@ public interface FileService {
     /**
      * 复制
      */
+    @Transactional(rollbackFor = Exception.class)
     File copy(Long toFolderId, Long id);
 }
