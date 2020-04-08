@@ -35,7 +35,7 @@ public class FileController {
 
     @ApiOperation("上传文件")
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
-    public CommonResult upload(@RequestPart MultipartFile file,
+    public CommonResult<File> upload(@RequestPart MultipartFile file,
                                @RequestParam(defaultValue = "0") Long folderId) {
         File result = fileService.upload(file, folderId);
         if (result == null) {
@@ -157,6 +157,15 @@ public class FileController {
         }
         return CommonResult.success(file);
 
+    }
+
+    @ApiOperation("放到回收站")
+    @RequestMapping(value = "/toRecycleBin/{id}", method = RequestMethod.POST)
+    public CommonResult toRecycleBin(@PathVariable Long id) {
+        if (fileService.toRecycleBin(id) <= 0) {
+            return CommonResult.failed();
+        }
+        return CommonResult.success();
     }
 
 }

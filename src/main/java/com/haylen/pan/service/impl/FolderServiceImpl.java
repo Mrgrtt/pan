@@ -3,7 +3,9 @@ package com.haylen.pan.service.impl;
 import com.haylen.pan.domain.entity.Folder;
 import com.haylen.pan.domain.entity.File;
 import com.haylen.pan.exception.ApiException;
+import com.haylen.pan.repository.FileRepository;
 import com.haylen.pan.repository.FolderRepository;
+import com.haylen.pan.repository.OwnerRepository;
 import com.haylen.pan.service.FolderService;
 import com.haylen.pan.service.FileService;
 import com.haylen.pan.service.OwnerService;
@@ -26,6 +28,10 @@ public class FolderServiceImpl implements FolderService {
     @Autowired
     private FolderRepository folderRepository;
     @Autowired
+    private FileRepository fileRepository;
+    @Autowired
+    private OwnerRepository ownerRepository;
+    @Autowired
     private OwnerService ownerService;
     @Autowired
     private FileService fileService;
@@ -45,7 +51,7 @@ public class FolderServiceImpl implements FolderService {
         folder.setGmtModified(LocalDateTime.now());
         folder.setParentId(parentId);
         folder.setOwnerId(ownerService.getCurrentOwnerId());
-        folder.setDeleted(0);
+        folder.setStatus(0);
         return folderRepository.save(folder);
     }
 
@@ -65,15 +71,12 @@ public class FolderServiceImpl implements FolderService {
         if (notExisted(newParentId)) {
             throw new ApiException("父目录不存在");
         }
-        Optional<Folder> optionalFolder = folderRepository.findById(id);
-        if (!optionalFolder.isPresent()) {
-            throw new ApiException("不存在该目录");
-        }
-        if(optionalFolder.get().getParentId().equals(newParentId)) {
+        Folder folder = getFolder(id);
+        if(folder.getParentId().equals(newParentId)) {
             return 1;
         }
         /* 该目录是否已经存在 */
-        if (existedChildFolder(newParentId, optionalFolder.get().getName())) {
+        if (existedChildFolder(newParentId, folder.getName())) {
             throw new ApiException("存在同名目录");
         }
         return folderRepository.updateParent(newParentId, id, ownerService.getCurrentOwnerId());
@@ -81,14 +84,11 @@ public class FolderServiceImpl implements FolderService {
 
     @Override
     public int rename(String newName, Long id) {
-        Optional<Folder> optionalFolder = folderRepository.findById(id);
-        if (!optionalFolder.isPresent()) {
-            throw new ApiException("不存在该目录");
-        }
-        if (optionalFolder.get().getName().equals(newName)) {
+        Folder folder = getFolder(id);
+        if (folder.getName().equals(newName)) {
             return 1;
         }
-        if (existedChildFolder(optionalFolder.get().getParentId(), newName)) {
+        if (existedChildFolder(folder.getParentId(), newName)) {
             throw new ApiException("存在同名目录");
         }
         return folderRepository.updateName(newName, id, ownerService.getCurrentOwnerId());
@@ -106,32 +106,26 @@ public class FolderServiceImpl implements FolderService {
 
     @Override
     public void delete(Long id) {
-        if (notExisted(id)) {
-            return ;
-        }
-        List<File> files = fileService.listFile(id);
+        List<File> files = fileRepository.listAllStatusFile(id, ownerService.getCurrentOwnerId());
         for (File file: files) {
             fileService.delete(file.getId());
         }
         /* 递归删除子目录 */
-        List<Folder> folders = listChildFolder(id);
+        List<Folder> folders =
+                folderRepository.listRecyclableFolder(id, ownerService.getCurrentOwnerId());
         for (Folder child: folders) {
             delete(child.getId());
         }
-        folderRepository.delete(id, ownerService.getCurrentOwnerId());
+        folderRepository.updateStatus(id, ownerService.getCurrentOwnerId(), 2);
     }
 
     @Override
-    public int copy(Long id, Long toFolderId) {
-        Optional<Folder> optionalFolder =
-                folderRepository.getFolder(id, ownerService.getCurrentOwnerId());
-        if (!optionalFolder.isPresent()) {
-            throw new ApiException("不存在该文件夹");
-        }
+    public void copy(Long id, Long toFolderId) {
+        Folder oldFolder = getFolder(id);
         if (notExisted(toFolderId)) {
             throw new ApiException("目标文件夹不存在");
         }
-        if (existedChildFolder(toFolderId, optionalFolder.get().getName())) {
+        if (existedChildFolder(toFolderId, oldFolder.getName())) {
             throw new ApiException("存在同名目录");
         }
 
@@ -141,7 +135,7 @@ public class FolderServiceImpl implements FolderService {
          */
         List<Folder> folders = listChildFolder(id);
 
-        Folder folder = copy(toFolderId, optionalFolder.get());
+        Folder folder = copy(toFolderId, oldFolder);
         folder = folderRepository.saveAndFlush(folder);
 
         /* 复制文件 */
@@ -154,7 +148,6 @@ public class FolderServiceImpl implements FolderService {
         for (Folder f: folders) {
             copy(f.getId(), folder.getId());
         }
-        return 1;
     }
 
     private Folder copy(Long parentId, Folder oldFolder) {
@@ -164,7 +157,7 @@ public class FolderServiceImpl implements FolderService {
         folder.setParentId(parentId);
         folder.setGmtCreate(LocalDateTime.now());
         folder.setGmtModified(LocalDateTime.now());
-        folder.setDeleted(oldFolder.getDeleted());
+        folder.setStatus(oldFolder.getStatus());
         return folder;
     }
 
@@ -173,5 +166,32 @@ public class FolderServiceImpl implements FolderService {
         Optional<Folder> folderOptional =
                 folderRepository.getFolder(id, name, ownerService.getCurrentOwnerId());
         return folderOptional.isPresent();
+    }
+
+    @Override
+    public void toRecycleBin(Long id) {
+        getFolder(id);
+        childFolderToRecycleBin(id);
+        folderRepository.updateStatus(id, ownerService.getCurrentOwnerId(), 1);
+    }
+
+    private void childFolderToRecycleBin(Long id) {
+        for (File file: fileService.listFile(id)) {
+            ownerRepository.reduceUsedStorageSpace(file.getSize(), ownerService.getCurrentOwnerId());
+            fileRepository.updateStatus(file.getId(), ownerService.getCurrentOwnerId(), 3);
+        }
+        for (Folder childFolder: listChildFolder(id)) {
+            childFolderToRecycleBin(childFolder.getId());
+        }
+        folderRepository.updateStatus(id, ownerService.getCurrentOwnerId(), 3);
+    }
+
+    private Folder getFolder(Long id) {
+        Optional<Folder> optionalFolder =
+                folderRepository.getFolder(id, ownerService.getCurrentOwnerId());
+        if (!optionalFolder.isPresent()) {
+            throw new ApiException("不存在该文件夹");
+        }
+        return optionalFolder.get();
     }
 }

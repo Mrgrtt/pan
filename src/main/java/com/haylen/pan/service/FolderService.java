@@ -39,17 +39,24 @@ public interface FolderService {
     /**
      * 删除文件夹及其子文件夹和文件
      */
-    @Transactional()
+    @Transactional(rollbackFor = Exception.class)
     void delete(Long id);
 
     /**
      * 复制目录下的所有子文件夹和文件
      * @param toFolderId 复制的目的目录
      */
-    int copy(Long id, Long toFolderId);
+    @Transactional(rollbackFor = Exception.class)
+    void copy(Long id, Long toFolderId);
 
     /**
      * 是否存在该名字的子文件夹
      */
     Boolean existedChildFolder(Long id, String name);
+
+    /**
+     * 放回收站
+     */
+    @Transactional(rollbackFor = Exception.class)
+    void toRecycleBin(Long id);
 }

@@ -76,4 +76,15 @@ public interface FileService {
      */
     @Transactional(rollbackFor = Exception.class)
     File copy(Long toFolderId, Long id);
+
+    /**
+     * 放到回收站
+     */
+    @Transactional(rollbackFor = Exception.class)
+    int toRecycleBin(Long id);
+
+    /**
+     * 检查并增加已用空间
+     */
+    void checkAndIncreaseUsedStorageSpace(Long expectedSize);
 }

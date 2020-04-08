@@ -77,9 +77,14 @@ public class FolderController {
     @ApiOperation("复制文件夹")
     @RequestMapping(value = "/copy/{id}", method = RequestMethod.POST)
     public CommonResult copy(@PathVariable Long id, @RequestParam Long toFolderId) {
-        if (folderService.copy(id, toFolderId) <= 0) {
-            return CommonResult.failed();
-        }
+        folderService.copy(id, toFolderId);
+        return CommonResult.success();
+    }
+
+    @ApiOperation("放到回收站")
+    @RequestMapping(value = "/toRecycleBin/{id}", method = RequestMethod.POST)
+    public CommonResult toRecycleBin(@PathVariable Long id) {
+        folderService.toRecycleBin(id);
         return CommonResult.success();
     }
 }

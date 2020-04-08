@@ -49,9 +49,10 @@ public class File extends BaseEntity {
     private Long size;
 
     /**
-     * 删除标志， 1->已删除 0->未删除
+     * 状态，0->正常，1->可回收（回收站中显示），2->已删除，
+     * 3->可回收（回收站中不显示，将文件夹放入回收站，其子孙文件处于该状态）
      */
     @JsonIgnore
     @Column(columnDefinition = "tinyint unsigned default 0", nullable = false)
-    private Integer deleted;
+    private Integer status;
 }

@@ -33,8 +33,8 @@ public class CommonResult<T> {
     /**
      * 成功返回结果
      */
-    public static CommonResult<String> success() {
-        return new CommonResult<>(ResultCode.SUCCESS.getCode(), ResultCode.SUCCESS.getMessage(), "");
+    public static <T> CommonResult<T> success() {
+        return new CommonResult<T>(ResultCode.SUCCESS.getCode(), ResultCode.SUCCESS.getMessage(), null);
     }
 
     /**
@@ -51,29 +51,29 @@ public class CommonResult<T> {
      * 失败返回结果
      * @param errorCode 错误码
      */
-    public static CommonResult<String> failed(ResultCode errorCode) {
-        return new CommonResult<>(errorCode.getCode(), errorCode.getMessage(), "");
+    public static <T> CommonResult<T> failed(ResultCode errorCode) {
+        return new CommonResult<T>(errorCode.getCode(), errorCode.getMessage(), null);
     }
 
     /**
      * 失败返回结果
      * @param message 提示信息
      */
-    public static CommonResult<String> failed(String message) {
-        return new CommonResult<>(ResultCode.FAILED.getCode(), message, "");
+    public static <T> CommonResult<T> failed(String message) {
+        return new CommonResult<T>(ResultCode.FAILED.getCode(), message, null);
     }
 
     /**
      * 失败返回结果
      */
-    public static CommonResult<String> failed() {
+    public static <T> CommonResult<T> failed() {
         return failed(ResultCode.FAILED);
     }
 
     /**
      * 参数验证失败返回结果
      */
-    public static CommonResult<String> validateFailed() {
+    public static <T> CommonResult<T> validateFailed() {
         return validateFailed(ResultCode.BAD_REQUEST.getMessage());
     }
 
@@ -81,31 +81,31 @@ public class CommonResult<T> {
      * 参数验证失败返回结果
      * @param message 提示信息
      */
-    public static CommonResult<String> validateFailed(String message) {
-        return new CommonResult<>(ResultCode.BAD_REQUEST.getCode(), message, "");
+    public static <T> CommonResult<T> validateFailed(String message) {
+        return new CommonResult<T>(ResultCode.BAD_REQUEST.getCode(), message, null);
     }
 
     /**
      * 404
      * @param message 提示信息
      */
-    public static CommonResult<String> notFound(String message) {
-        return new CommonResult<>(ResultCode.NOT_FOUND.getCode(), message, "");
+    public static <T> CommonResult<T> notFound(String message) {
+        return new CommonResult<T>(ResultCode.NOT_FOUND.getCode(), message, null);
     }
 
     /**
      * 404
      */
-    public static CommonResult<String> notFound() {
+    public static <T> CommonResult<T> notFound() {
         return notFound(ResultCode.NOT_FOUND.getMessage());
     }
 
     /**
      * 405
      */
-    public static CommonResult<String> methodNotAllowed() {
-        return new CommonResult<>(ResultCode.METHOD_NOT_ALLOWED.getCode(),
-                ResultCode.METHOD_NOT_ALLOWED.getMessage(), "");
+    public static <T> CommonResult<T> methodNotAllowed() {
+        return new CommonResult<T>(ResultCode.METHOD_NOT_ALLOWED.getCode(),
+                ResultCode.METHOD_NOT_ALLOWED.getMessage(), null);
     }
 
     /**

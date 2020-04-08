@@ -33,7 +33,7 @@ public class OwnerController {
     }
 
     @ApiOperation("登陆")
-    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    @RequestMapping(value = "/login", method = RequestMethod.GET)
     public CommonResult<String> login(@Valid LoginParam loginParam) {
         String token = ownerService.login(loginParam);
         if (token == null) {
