@@ -3,9 +3,21 @@ spring:
     url: jdbc:mysql://localhost:3306/pan?useUnicode=true&characterEncodeing=utf-8&serverTimezone=Asia/Shanghai
     username: root
     password: 3324
-    hikari:
-      maximum-pool-size: 20
-      minimum-idle: 5
+    druid:
+      filter:
+        stat:
+          log-slow-sql: true
+          merge-sql: true
+          slow-sql-millis: 1000
+      web-stat-filter:
+        enabled: true
+        exclusions: /druid/*
+      stat-view-servlet:
+        enabled: true
+        login-username: haylen
+        login-password: 3324
+        allow: 127.0.0.1
+        url-pattern: /druid/*
 
   jpa:
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
@@ -18,12 +30,6 @@ spring:
     host: 127.0.0.1
     port: 6379
     password:
-    jedis:
-      pool:
-        max-active: 500
-        max-idle: 1000
-        max-wait: 6000ms
-        min-idle: 4
 
   elasticsearch:
     rest:
@@ -31,6 +37,7 @@ spring:
 
 jwt:
   expiration: 864000 #10天 单位秒
+  secret: panpanpanpanppppppppppanpanpoooooooooooooooooohjforehfrehgrhwpbfweooanpan
 
 file-storage-path: D:/panFile/
 
