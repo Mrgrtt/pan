@@ -13,7 +13,6 @@ import javax.validation.constraints.NotEmpty;
 @Data
 public class LoginParam {
     @ApiModelProperty("用户名")
-    @NotEmpty
     private String username;
 
     @ApiModelProperty("密码")

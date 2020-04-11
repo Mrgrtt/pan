@@ -1,4 +1,4 @@
-package com.haylen.pan;
+package com.haylen.pan.util;
 
 import com.haylen.pan.util.JwtUtil;
 import org.junit.Assert;

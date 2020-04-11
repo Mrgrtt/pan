@@ -24,6 +24,11 @@ spring:
         max-idle: 1000
         max-wait: 6000ms
         min-idle: 4
+
+  elasticsearch:
+    rest:
+      uris: http://127.0.0.1:9200
+
 jwt:
   expiration: 864000 #10天 单位秒
 
