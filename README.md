@@ -1,2 +1,11 @@
 # pan
-javaweb 实习项目，简易的个人网盘
+简易的网盘系统
+
+技术栈
+
+- spring boot
+- spring data jpa
+- spring security
+- elasticsearch
+- redis
+- mysql
