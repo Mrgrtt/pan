@@ -3,6 +3,7 @@ package com.haylen.pan.controller;
 import com.haylen.pan.domain.dto.CommonResult;
 import com.haylen.pan.domain.entity.File;
 import com.haylen.pan.service.FileService;
+import com.haylen.pan.service.OwnerService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,12 +33,14 @@ import java.util.List;
 public class FileController {
     @Autowired
     private FileService fileService;
+    @Autowired
+    private OwnerService ownerService;
 
     @ApiOperation("上传文件")
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
     public CommonResult<File> upload(@RequestPart MultipartFile file,
                                @RequestParam(defaultValue = "0") Long folderId) {
-        File result = fileService.upload(file, folderId);
+        File result = fileService.upload(file, folderId, ownerService.getCurrentOwnerId());
         if (result == null) {
             return CommonResult.failed();
         }
@@ -47,22 +50,25 @@ public class FileController {
     @ApiOperation("下载文件（无需登陆)")
     @RequestMapping(value = "/download/{key}", method = RequestMethod.GET)
     public ResponseEntity<StreamingResponseBody> download(@PathVariable String key,
+                        @RequestParam(defaultValue = "file") String fileName,
                         @RequestHeader(name = "Range", required = false) String rangeHeader){
-        InputStream inputStream = fileService.download(key);
+        String fileType = MediaType.IMAGE_JPEG_VALUE;
+
         // 非网盘文件默认类型为图片，如上传的头像
-        File file = fileService.getFileByStorageKey(key);
-        if (file == null) {
-            file = new File();
-            file.setName("file");
-            file.setMediaType(MediaType.IMAGE_JPEG_VALUE);
+        String type = fileService.getFileTypeByStorageKey(key);
+        if (type != null) {
+            fileType = type;
         }
         long fileLength = 0;
-        String encodeFilename;
 
+        InputStream inputStream = fileService.download(key);
         try {
             fileLength = inputStream.available();
-            encodeFilename = URLEncoder.encode(file.getName(), StandardCharsets.UTF_8);
         } catch (IOException e) {
+            try {
+                inputStream.close();
+            } catch (IOException ignored) {
+            }
             return ResponseEntity.badRequest().build();
         }
         long rangeStart = 0;
@@ -101,10 +107,10 @@ public class FileController {
         headers.add("Accept-Ranges", "bytes");
         headers.add("Content-Range", "bytes " + rangeStart + "-" + (rangeEnd - 1) + "/" + fileLength);
         headers.add("Content-Disposition",
-                "attachment; filename=" + encodeFilename);
+                "attachment; filename*=UTF-8''" + URLEncoder.encode(fileName, StandardCharsets.UTF_8));
         return ResponseEntity.status(206)
                 .contentLength(contentLength)
-                .contentType(MediaType.valueOf(file.getMediaType()))
+                .contentType(MediaType.valueOf(fileType))
                 .headers(headers)
                 .body(streamingResponseBody);
     }
@@ -113,14 +119,14 @@ public class FileController {
     @RequestMapping(value = "/list/{folderId}", method = RequestMethod.GET)
     public CommonResult<List<File>> list(@PathVariable Long folderId) {
         // todo: swagger ui 上显示错误的File类
-        return CommonResult.success(fileService.listFile(folderId));
+        return CommonResult.success(fileService.listFile(folderId, ownerService.getCurrentOwnerId()));
     }
 
     @ApiOperation("重命名文件")
     @RequestMapping(value = "/rename/{id}", method = RequestMethod.POST)
     public CommonResult rename(@RequestParam @NotEmpty String newName,
                                @PathVariable Long id) {
-        if (fileService.rename(newName, id) <= 0) {
+        if (fileService.rename(newName, id, ownerService.getCurrentOwnerId()) <= 0) {
             return CommonResult.failed();
         }
         return CommonResult.success();
@@ -129,7 +135,7 @@ public class FileController {
     @ApiOperation("移动文件")
     @RequestMapping(value = "/move/{id}", method = RequestMethod.POST)
     public CommonResult move(@RequestParam Long newFolderId, @PathVariable Long id) {
-        if (fileService.move(newFolderId, id) <= 0) {
+        if (fileService.move(newFolderId, id, ownerService.getCurrentOwnerId()) <= 0) {
             return CommonResult.failed();
         }
         return CommonResult.success();
@@ -138,20 +144,20 @@ public class FileController {
     @ApiOperation("删除文件")
     @RequestMapping(value = "/delete/{id}", method = RequestMethod.POST)
     public CommonResult delete(@PathVariable Long id) {
-        fileService.delete(id);
+        fileService.delete(id, ownerService.getCurrentOwnerId());
         return CommonResult.success();
     }
 
     @ApiOperation("指定目录下是否存在指定文件")
     @RequestMapping(value = "/existed", method = RequestMethod.GET)
     public CommonResult<Boolean> existed(@RequestParam Long folderId, @RequestParam @NotEmpty String name) {
-        return CommonResult.success(fileService.isExisted(folderId, name));
+        return CommonResult.success(fileService.isExisted(folderId, name, ownerService.getCurrentOwnerId()));
     }
 
     @ApiOperation("复制文件")
     @RequestMapping(value = "/copy/{id}", method = RequestMethod.POST)
     public CommonResult copy(@RequestParam Long toFolderId, @PathVariable Long id) {
-        File file = fileService.copy(toFolderId, id);
+        File file = fileService.copy(toFolderId, id, ownerService.getCurrentOwnerId());
         if (file == null) {
             return CommonResult.failed();
         }
@@ -162,7 +168,7 @@ public class FileController {
     @ApiOperation("放到回收站")
     @RequestMapping(value = "/toRecycleBin/{id}", method = RequestMethod.POST)
     public CommonResult toRecycleBin(@PathVariable Long id) {
-        if (fileService.toRecycleBin(id) <= 0) {
+        if (fileService.toRecycleBin(id, ownerService.getCurrentOwnerId()) <= 0) {
             return CommonResult.failed();
         }
         return CommonResult.success();

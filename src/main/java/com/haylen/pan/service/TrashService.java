@@ -14,22 +14,22 @@ public interface TrashService {
     /**
      * 获取可回收文件列表
      */
-    Page<File> listRecyclableFile(int pageNum, int pageSize);
+    Page<File> listRecyclableFile(int pageNum, int pageSize, Long ownerId);
 
     /**
      * 还原文件
      */
     @Transactional(rollbackFor = Exception.class)
-    int recycleFile(Long id);
+    int recycleFile(Long id, Long ownerId);
 
     /**
      * 获取可回收文件夹列表
      */
-    Page<Folder> listRecyclableFolder(int pageNum, int pageSize);
+    Page<Folder> listRecyclableFolder(int pageNum, int pageSize, Long ownerId);
 
     /**
      * 还原文件夹
      */
     @Transactional(rollbackFor = Exception.class)
-    void recycleFolder(Long id);
+    void recycleFolder(Long id, Long ownerId);
 }

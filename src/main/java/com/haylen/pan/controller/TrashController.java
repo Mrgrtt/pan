@@ -4,6 +4,7 @@ import com.haylen.pan.domain.dto.CommonResult;
 import com.haylen.pan.domain.dto.PageResult;
 import com.haylen.pan.domain.entity.File;
 import com.haylen.pan.domain.entity.Folder;
+import com.haylen.pan.service.OwnerService;
 import com.haylen.pan.service.TrashService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -22,20 +23,22 @@ import org.springframework.web.bind.annotation.*;
 public class TrashController {
     @Autowired
     private TrashService trashService;
+    @Autowired
+    private OwnerService ownerService;
 
     @ApiOperation("获取可回收文件列表")
     @RequestMapping(value = "/file/recyclable", method = RequestMethod.GET)
     public CommonResult<PageResult<File>> listDeletedFile(
             @RequestParam(defaultValue = "0") Integer pageNum,
             @RequestParam(defaultValue = "16") Integer pageSize) {
-        Page<File> filePage = trashService.listRecyclableFile(pageNum, pageSize);
+        Page<File> filePage = trashService.listRecyclableFile(pageNum, pageSize, ownerService.getCurrentOwnerId());
         return CommonResult.success(PageResult.of(filePage));
     }
 
     @ApiOperation("还原文件")
     @RequestMapping(value = "/file/recycle/{id}", method = RequestMethod.POST)
     public CommonResult recycleFile(@PathVariable Long id) {
-        if (trashService.recycleFile(id) <= 0) {
+        if (trashService.recycleFile(id, ownerService.getCurrentOwnerId()) <= 0) {
             return CommonResult.failed();
         }
         return CommonResult.success();
@@ -46,14 +49,14 @@ public class TrashController {
     public CommonResult<PageResult<Folder>> listDeletedFolder(
             @RequestParam(defaultValue = "0") Integer pageNum,
             @RequestParam(defaultValue = "16") Integer pageSize) {
-        Page<Folder> folderPage = trashService.listRecyclableFolder(pageNum, pageSize);
+        Page<Folder> folderPage = trashService.listRecyclableFolder(pageNum, pageSize, ownerService.getCurrentOwnerId());
         return CommonResult.success(PageResult.of(folderPage));
     }
 
     @ApiOperation("还原文件夹")
     @RequestMapping(value = "/folder/recycle/{id}", method = RequestMethod.POST)
     public CommonResult recycleFolder(@PathVariable Long id) {
-        trashService.recycleFolder(id);
+        trashService.recycleFolder(id, ownerService.getCurrentOwnerId());
         return CommonResult.success();
     }
 }

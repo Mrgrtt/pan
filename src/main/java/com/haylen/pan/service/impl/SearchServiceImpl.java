@@ -89,6 +89,9 @@ public class SearchServiceImpl implements SearchService {
                         .must(QueryBuilders.constantScoreQuery(
                                 QueryBuilders.termQuery("owner_id", ownerService.getCurrentOwnerId())
                         ))
+                        .must(QueryBuilders.constantScoreQuery(
+                                QueryBuilders.termQuery("status", 0)
+                        ))
         ).from(from).size(size);
         return searchSourceBuilder;
     }

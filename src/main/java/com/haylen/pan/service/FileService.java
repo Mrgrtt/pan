@@ -17,71 +17,85 @@ public interface FileService {
      * 上传文件
      * @param multipartFile 文件
      * @param folderId 上传到的目录id
+     * @param ownerId 用户id
      * @return 文件
      */
     @Transactional(rollbackFor = Exception.class)
-    File upload(MultipartFile multipartFile, Long folderId);
+    File upload(MultipartFile multipartFile, Long folderId, Long ownerId);
 
     /**
-     * 根据储存key获取文件
+     * 获取文件类型
      * @param key 储存key
-     * @return 文件
      */
-    File getFileByStorageKey(String key);
+    String getFileTypeByStorageKey(String key);
 
     /**
-     * 根据储存key下载文件
+     * 下载文件
      * @param key 储存key
      * @return 文件流
      */
     InputStream download(String key);
 
     /**
-     * 获取指定目录下的文件
+     * 获取目录下的文件
      * @param folderId 目录id
+     * @param ownerId 用户id
      * @return 文件列表
      */
-    List<File> listFile(Long folderId);
+    List<File> listFile(Long folderId, Long ownerId);
+
     /**
      * 重命名文件
-     * @param newName 新名
+     * @param newName 新文件名
      * @param id 文件id
+     * @param ownerId 用户id
      * @return 结果
      */
-    int rename(String newName, Long id);
+    int rename(String newName, Long id, Long ownerId);
 
     /**
      * 移动文件
      * @param newFolderId 新目录id
      * @param id 文件id
+     * @param ownerId 用户id
      * @return 结果
      */
-    int move(Long newFolderId, Long id);
+    int move(Long newFolderId, Long id, Long ownerId);
 
     /**
      * 删除文件
      * @param id 文件id
-     * @return 结果
+     * @param ownerId 用户id
      */
     @Transactional(rollbackFor = Exception.class)
-    void delete(Long id);
+    void delete(Long id, Long ownerId);
 
     /**
      * 文件是否已存在
+     * @param folderId 目录id
+     * @param name 文件名
+     * @param ownerId 用户id
+     * @return 结果
      */
-    boolean isExisted(Long folderId, String name);
+    boolean isExisted(Long folderId, String name, Long ownerId);
 
     /**
      * 复制
+     * @param id 文件id
+     * @param toFolderId 目标目录id
+     * @param ownerId 用户id
      */
     @Transactional(rollbackFor = Exception.class)
-    File copy(Long toFolderId, Long id);
+    File copy(Long toFolderId, Long id, Long ownerId);
 
     /**
      * 放到回收站
+     * @param id 文件id
+     * @param ownerId 用户id
+     * @return 结果
      */
     @Transactional(rollbackFor = Exception.class)
-    int toRecycleBin(Long id);
+    int toRecycleBin(Long id, Long ownerId);
 
     /**
      * 检查并增加已用空间

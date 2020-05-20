@@ -45,10 +45,10 @@ public interface FolderRepository extends JpaRepository<Folder, Long> {
     Optional<Folder> getFolder(Long id, Long ownerId);
 
     /**
-     * 是否存在该名字的子文件夹
+     * 获取指定名字的子文件夹
      */
     @Query("select f from Folder f where f.parentId = ?1 and f.name = ?2 and f.ownerId = ?3 and f.status = 0")
-    Optional<Folder> getFolder(Long parentId, String name, Long ownerId);
+    List<Folder> getFolders(Long parentId, String name, Long ownerId);
 
     /**
      * 删除
@@ -80,5 +80,5 @@ public interface FolderRepository extends JpaRepository<Folder, Long> {
      * 查找文件列表
      */
     @Query("select f from Folder f where f.parentId = ?1 and f.ownerId = ?2")
-    List<Folder> listAllStatusFolder(Long parentId, Long ownerId);
+    List<Folder> listAnyStatusFolder(Long parentId, Long ownerId);
 }

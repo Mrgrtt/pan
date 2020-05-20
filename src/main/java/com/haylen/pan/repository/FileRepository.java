@@ -3,7 +3,6 @@ package com.haylen.pan.repository;
 import com.haylen.pan.domain.entity.File;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -27,7 +26,7 @@ public interface FileRepository extends JpaRepository<File, Long> {
      * 根据储存key获取文件
      * @param storageKey 储存key
      */
-    File findFileByStorageKey(String storageKey);
+    List<File> findFilesByStorageKey(String storageKey);
 
     /**
      * 获取指定目录下的文件
@@ -63,7 +62,7 @@ public interface FileRepository extends JpaRepository<File, Long> {
      * 查找文件
      */
     @Query("select f from File f where f.folderId = ?1 and f.name = ?2 and f.ownerId = ?3 and f.status = 0")
-    Optional<File> findFileByFolderIdAndNameAndOwnerId(Long folderId,  String name, Long ownerId);
+    List<File> findFileByFolderIdAndNameAndOwnerId(Long folderId,  String name, Long ownerId);
 
     /**
      * 获取可回收文件列表
@@ -87,11 +86,11 @@ public interface FileRepository extends JpaRepository<File, Long> {
      * 查找文件
      */
     @Query("select f from File f where f.id = ?1 and f.ownerId = ?2")
-    Optional<File> getAllStatusFile(Long id, Long ownerId);
+    Optional<File> getAnyStatusFile(Long id, Long ownerId);
 
     /**
      * 查找文件列表
      */
     @Query("select f from File f where f.folderId = ?1 and f.ownerId = ?2")
-    List<File> listAllStatusFile(Long folderId, Long ownerId);
+    List<File> listAnyStatusFile(Long folderId, Long ownerId);
 }

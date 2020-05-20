@@ -29,29 +29,29 @@ public class FileServiceImpl implements FileService {
     @Autowired
     private FileStorageService fileStorageService;
     @Autowired
-    private OwnerService ownerService;
-    @Autowired
     private FileRepository fileRepository;
     @Autowired
     private FolderService folderService;
     @Autowired
+    private OwnerService ownerService;
+    @Autowired
     private OwnerRepository ownerRepository;
 
     @Override
-    public File upload(MultipartFile multipartFile, Long folderId) {
+    public File upload(MultipartFile multipartFile, Long folderId, Long ownerId) {
         /* 该目录是不存在 */
-        if (folderService.notExisted(folderId)) {
+        if (folderService.notExisted(folderId, ownerId)) {
             throw new ApiException("该目录不存在");
         }
         /* 存在同命文件 */
-        if (isExisted(folderId, multipartFile.getOriginalFilename())) {
+        if (isExisted(folderId, multipartFile.getOriginalFilename(), ownerId)) {
             throw new ApiException("目录存在同名文件");
         }
         checkAndIncreaseUsedStorageSpace(multipartFile.getSize());
         String storageKey = fileStorageService.putFile(multipartFile);
         File file = new File();
         file.setFolderId(folderId);
-        file.setOwnerId(ownerService.getCurrentOwnerId());
+        file.setOwnerId(ownerId);
         file.setStorageKey(storageKey);
         file.setName(multipartFile.getOriginalFilename());
         file.setMediaType(multipartFile.getContentType());
@@ -62,8 +62,12 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public File getFileByStorageKey(String key) {
-        return fileRepository.findFileByStorageKey(key);
+    public String getFileTypeByStorageKey(String key) {
+        List<File> files = fileRepository.findFilesByStorageKey(key);
+        if (files.size() <= 0) {
+            return null;
+        }
+        return files.get(0).getMediaType();
     }
 
     @Override
@@ -72,45 +76,45 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public List<File> listFile(Long folderId) {
+    public List<File> listFile(Long folderId, Long ownerId) {
         return fileRepository.findFilesByFolderIdAndOwnerId(
-                folderId, ownerService.getCurrentOwnerId());
+                folderId, ownerId);
     }
 
     @Override
-    public int rename(String newName, Long id) {
-        File file = getFileById(id);
+    public int rename(String newName, Long id, Long ownerId) {
+        File file = getFileById(id, ownerId);
         if (file.getName().equals(newName)) {
             return 1;
         }
-        if (isExisted(file.getFolderId(), newName)) {
+        if (isExisted(file.getFolderId(), newName, ownerId)) {
             throw new ApiException("所在目录存在同名文件");
         }
-        return fileRepository.updateName(newName, id, ownerService.getCurrentOwnerId());
+        return fileRepository.updateName(newName, id, ownerId);
     }
 
     @Override
-    public int move(Long newFolderId, Long id) {
-        if (folderService.notExisted(newFolderId)) {
+    public int move(Long newFolderId, Long id, Long ownerId) {
+        if (folderService.notExisted(newFolderId, ownerId)) {
             throw new ApiException("不存在该目录");
         }
 
-        File file = getFileById(id);
+        File file = getFileById(id, ownerId);
         if (file.getOwnerId().equals(newFolderId)) {
             return 1;
         }
-        if (isExisted(newFolderId, file.getName())) {
+        if (isExisted(newFolderId, file.getName(), ownerId)) {
             throw new ApiException("目录存在同名文件");
         }
-        return fileRepository.updateFolderId(newFolderId, id, ownerService.getCurrentOwnerId());
+        return fileRepository.updateFolderId(newFolderId, id, ownerId);
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(Long id, Long ownerId) {
         Integer normalStatus = 0;
         Integer deletedStatus = 2;
         Optional<File> optionalFile =
-                fileRepository.getAllStatusFile(id, ownerService.getCurrentOwnerId());
+                fileRepository.getAnyStatusFile(id, ownerId);
         if (!optionalFile.isPresent()) {
             throw new ApiException("文件不存在");
         }
@@ -118,32 +122,31 @@ public class FileServiceImpl implements FileService {
         if (file.getStatus().equals(deletedStatus)) {
             return ;
         }
-        Owner owner = ownerService.getCurrentOwner();
         /* 删除回收站中的文件不更新已用空间 */
         if (file.getStatus().equals(normalStatus)) {
-            ownerRepository.reduceUsedStorageSpace(file.getSize(), owner.getId());
+            ownerRepository.reduceUsedStorageSpace(file.getSize(), ownerId);
         }
-        fileRepository.updateStatus(id, owner.getId(), deletedStatus);
+        fileRepository.updateStatus(id, ownerId, deletedStatus);
     }
 
     @Override
-    public boolean isExisted(Long folderId, String name) {
-        Optional<File> optionalFile = fileRepository
-                .findFileByFolderIdAndNameAndOwnerId(folderId, name, ownerService.getCurrentOwnerId());
-        return optionalFile.isPresent();
+    public boolean isExisted(Long folderId, String name, Long ownerId) {
+        List<File> files = fileRepository
+                .findFileByFolderIdAndNameAndOwnerId(folderId, name, ownerId);
+        return files.size() > 0;
     }
 
     @Override
-    public File copy(Long toFolderId, Long id) {
-        if (folderService.notExisted(toFolderId)) {
+    public File copy(Long toFolderId, Long id, Long ownerId) {
+        if (folderService.notExisted(toFolderId, ownerId)) {
             throw new ApiException("目标文件夹不存在");
         }
-        File oldFile = getFileById(id);
+        File oldFile = getFileById(id, ownerId);
         if (oldFile.getFolderId().equals(toFolderId)) {
             return oldFile;
         }
         /* 是否存在同名文件 */
-        if (isExisted(toFolderId, oldFile.getName())) {
+        if (isExisted(toFolderId, oldFile.getName(), ownerId)) {
             throw new ApiException("文件夹存在同名文件");
         }
         checkAndIncreaseUsedStorageSpace(oldFile.getSize());
@@ -152,10 +155,10 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public int toRecycleBin(Long id) {
-        File file = getFileById(id);
-        ownerRepository.reduceUsedStorageSpace(file.getSize(), ownerService.getCurrentOwnerId());
-        return fileRepository.updateStatus(id, ownerService.getCurrentOwnerId(), 1);
+    public int toRecycleBin(Long id, Long ownerId) {
+        File file = getFileById(id, ownerId);
+        ownerRepository.reduceUsedStorageSpace(file.getSize(), ownerId);
+        return fileRepository.updateStatus(id, ownerId, 1);
     }
 
     private File copy(Long folderId,File oldFile) {
@@ -182,9 +185,9 @@ public class FileServiceImpl implements FileService {
         ownerRepository.increaseUsedStorageSpace(expectedSize, owner.getId());
     }
 
-    private File getFileById(Long id) {
+    private File getFileById(Long id, Long ownerId) {
         Optional<File> optionalFile = fileRepository.
-                findFileByIdAndOwnerId(id, ownerService.getCurrentOwnerId());
+                findFileByIdAndOwnerId(id, ownerId);
         if (!optionalFile.isPresent()) {
             throw new ApiException("文件不存在");
         }

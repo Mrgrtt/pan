@@ -8,7 +8,6 @@ import com.haylen.pan.repository.FolderRepository;
 import com.haylen.pan.repository.OwnerRepository;
 import com.haylen.pan.service.FolderService;
 import com.haylen.pan.service.FileService;
-import com.haylen.pan.service.OwnerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,72 +31,70 @@ public class FolderServiceImpl implements FolderService {
     @Autowired
     private OwnerRepository ownerRepository;
     @Autowired
-    private OwnerService ownerService;
-    @Autowired
     private FileService fileService;
 
     @Override
-    public Folder create(Long parentId, String name){
+    public Folder create(Long parentId, String name, Long ownerId){
         /* 父目录不存在 */
-        if (notExisted(parentId)) {
+        if (notExisted(parentId, ownerId)) {
             throw new ApiException("父目录不存在");
         }
         /* 存在同名目录 */
-        if (existedChildFolder(parentId, name)) {
+        if (existedChildFolder(parentId, name, ownerId)) {
             throw new ApiException("存在同名目录");
         }
         Folder folder = new Folder();
         folder.setName(name);
         folder.setGmtModified(LocalDateTime.now());
         folder.setParentId(parentId);
-        folder.setOwnerId(ownerService.getCurrentOwnerId());
+        folder.setOwnerId(ownerId);
         folder.setStatus(0);
         return folderRepository.save(folder);
     }
 
     @Override
-    public List<Folder> listChildFolder(Long id) {
+    public List<Folder> listChildFolder(Long id, Long ownerId) {
         return folderRepository.
-                listChildFolder(id, ownerService.getCurrentOwnerId());
+                listChildFolder(id, ownerId);
     }
 
     @Override
-    public int move(Long newParentId, Long id){
+    public int move(Long newParentId, Long id, Long ownerId){
         /* 禁止将自身设为其父目录 */
         if (newParentId.equals(id)) {
             throw new ApiException("禁止将自身设为其父目录");
         }
         /* 该父目录不存在 */
-        if (notExisted(newParentId)) {
+        if (notExisted(newParentId, ownerId)) {
             throw new ApiException("父目录不存在");
         }
-        Folder folder = getFolder(id);
+        Folder folder = getFolder(id, ownerId);
         if(folder.getParentId().equals(newParentId)) {
             return 1;
         }
         /* 该目录是否已经存在 */
-        if (existedChildFolder(newParentId, folder.getName())) {
+        if (existedChildFolder(newParentId, folder.getName(), ownerId)) {
             throw new ApiException("存在同名目录");
         }
-        return folderRepository.updateParent(newParentId, id, ownerService.getCurrentOwnerId());
+        return folderRepository.updateParent(newParentId, id, ownerId);
     }
 
     @Override
-    public int rename(String newName, Long id) {
-        Folder folder = getFolder(id);
+    public int rename(String newName, Long id, Long ownerId) {
+        Folder folder = getFolder(id, ownerId);
         if (folder.getName().equals(newName)) {
             return 1;
         }
-        if (existedChildFolder(folder.getParentId(), newName)) {
+        if (existedChildFolder(folder.getParentId(), newName, ownerId)) {
             throw new ApiException("存在同名目录");
         }
-        return folderRepository.updateName(newName, id, ownerService.getCurrentOwnerId());
+        return folderRepository.updateName(newName, id, ownerId);
     }
 
     @Override
-    public boolean notExisted(Long id) {
+    public boolean notExisted(Long id, Long ownerId) {
         Optional<Folder> folderOptional =
-                folderRepository.getFolder(id, ownerService.getCurrentOwnerId());
+                folderRepository.getFolder(id, ownerId);
         if (id !=0 && !folderOptional.isPresent()) {
             return true;
         }
@@ -105,27 +102,27 @@ public class FolderServiceImpl implements FolderService {
     }
 
     @Override
-    public void delete(Long id) {
-        List<File> files = fileRepository.listAllStatusFile(id, ownerService.getCurrentOwnerId());
+    public void delete(Long id, Long ownerId) {
+        List<File> files = fileRepository.listAnyStatusFile(id, ownerId);
         for (File file: files) {
-            fileService.delete(file.getId());
+            fileService.delete(file.getId(), ownerId);
         }
         /* 递归删除子目录 */
         List<Folder> folders =
-                folderRepository.listRecyclableFolder(id, ownerService.getCurrentOwnerId());
+                folderRepository.listAnyStatusFolder(id, ownerId);
         for (Folder child: folders) {
-            delete(child.getId());
+            delete(child.getId(), ownerId);
         }
-        folderRepository.updateStatus(id, ownerService.getCurrentOwnerId(), 2);
+        folderRepository.updateStatus(id, ownerId, 2);
     }
 
     @Override
-    public void copy(Long id, Long toFolderId) {
-        Folder oldFolder = getFolder(id);
-        if (notExisted(toFolderId)) {
+    public void copy(Long id, Long toFolderId, Long ownerId) {
+        Folder oldFolder = getFolder(id, ownerId);
+        if (notExisted(toFolderId, ownerId)) {
             throw new ApiException("目标文件夹不存在");
         }
-        if (existedChildFolder(toFolderId, oldFolder.getName())) {
+        if (existedChildFolder(toFolderId, oldFolder.getName(), ownerId)) {
             throw new ApiException("存在同名目录");
         }
 
@@ -133,20 +130,20 @@ public class FolderServiceImpl implements FolderService {
          * 需要在这里先获取子文件夹列表，避免自我复制时（参数id == toFolderId）
          * 无限循环。
          */
-        List<Folder> folders = listChildFolder(id);
+        List<Folder> folders = listChildFolder(id, ownerId);
 
         Folder folder = copy(toFolderId, oldFolder);
         folder = folderRepository.saveAndFlush(folder);
 
         /* 复制文件 */
-        List<File> files = fileService.listFile(id);
+        List<File> files = fileService.listFile(id, ownerId);
         for (File file: files) {
-            fileService.copy(folder.getId(), file.getId());
+            fileService.copy(folder.getId(), file.getId(), ownerId);
         }
 
         /* 复制子文件夹 */
         for (Folder f: folders) {
-            copy(f.getId(), folder.getId());
+            copy(f.getId(), folder.getId(), ownerId);
         }
     }
 
@@ -162,33 +159,33 @@ public class FolderServiceImpl implements FolderService {
     }
 
     @Override
-    public Boolean existedChildFolder(Long id, String name) {
-        Optional<Folder> folderOptional =
-                folderRepository.getFolder(id, name, ownerService.getCurrentOwnerId());
-        return folderOptional.isPresent();
+    public Boolean existedChildFolder(Long id, String name, Long ownerId) {
+        List<Folder> folders =
+                folderRepository.getFolders(id, name, ownerId);
+        return folders.size() > 0;
     }
 
     @Override
-    public void toRecycleBin(Long id) {
-        getFolder(id);
-        childFolderToRecycleBin(id);
-        folderRepository.updateStatus(id, ownerService.getCurrentOwnerId(), 1);
+    public void toRecycleBin(Long id, Long ownerId) {
+        getFolder(id, ownerId);
+        childFolderToRecycleBin(id, ownerId);
+        folderRepository.updateStatus(id, ownerId, 1);
     }
 
-    private void childFolderToRecycleBin(Long id) {
-        for (File file: fileService.listFile(id)) {
-            ownerRepository.reduceUsedStorageSpace(file.getSize(), ownerService.getCurrentOwnerId());
-            fileRepository.updateStatus(file.getId(), ownerService.getCurrentOwnerId(), 3);
+    private void childFolderToRecycleBin(Long id, Long ownerId) {
+        for (File file: fileService.listFile(id, ownerId)) {
+            ownerRepository.reduceUsedStorageSpace(file.getSize(), ownerId);
+            fileRepository.updateStatus(file.getId(), ownerId, 3);
         }
-        for (Folder childFolder: listChildFolder(id)) {
-            childFolderToRecycleBin(childFolder.getId());
+        for (Folder childFolder: listChildFolder(id, ownerId)) {
+            childFolderToRecycleBin(childFolder.getId(), ownerId);
         }
-        folderRepository.updateStatus(id, ownerService.getCurrentOwnerId(), 3);
+        folderRepository.updateStatus(id, ownerId, 3);
     }
 
-    private Folder getFolder(Long id) {
+    private Folder getFolder(Long id, Long ownerId) {
         Optional<Folder> optionalFolder =
-                folderRepository.getFolder(id, ownerService.getCurrentOwnerId());
+                folderRepository.getFolder(id, ownerId);
         if (!optionalFolder.isPresent()) {
             throw new ApiException("不存在该文件夹");
         }
