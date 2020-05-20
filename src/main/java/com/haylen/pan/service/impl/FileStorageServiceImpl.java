@@ -2,8 +2,9 @@ package com.haylen.pan.service.impl;
 
 import com.haylen.pan.exception.ApiException;
 import com.haylen.pan.service.FileStorageService;
-import com.haylen.pan.util.Sha256Util;
+import com.haylen.pan.service.StorageKeyService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,13 +24,15 @@ import java.nio.file.Paths;
 public class FileStorageServiceImpl implements FileStorageService {
     @Value("${file-storage-path}")
     private String fileStoragePath;
+    @Autowired
+    private  StorageKeyService storageKeyService;
 
     @Override
     public String putFile(MultipartFile multipartFile) {
         Path folderPath = Paths.get(fileStoragePath);
         String storageKey;
         try {
-            storageKey = Sha256Util.encode(multipartFile.getInputStream());
+            storageKey = storageKeyService.getStorageKey(multipartFile.getInputStream());
         } catch (Exception e) {
             log.info("文件Sha256值计算失败", e);
             throw new ApiException("文件上传失败");

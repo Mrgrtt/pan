@@ -1,15 +1,24 @@
-package com.haylen.pan.util;
+package com.haylen.pan.service.impl;
+
+import com.haylen.pan.service.StorageKeyService;
+import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 
 /**
- * @author haylen
- * @date 2020-02-29
+ * @author Haylen
+ * @date 2020-5-20
  */
-public class Sha256Util {
-   public static String encode(InputStream input) throws Exception {
+@Service
+public class StorageKeyServiceImpl implements StorageKeyService {
+
+    /**
+     * sha256
+     */
+    @Override
+    public String getStorageKey(InputStream input) throws Exception {
         MessageDigest messageDigest = MessageDigest.getInstance("sha-256");
         byte[] buffer = new byte[1024];
         int length = 0;
@@ -18,6 +27,6 @@ public class Sha256Util {
         }
         input.close();
         byte[] sha256Bytes = messageDigest.digest();
-       return new BigInteger(1, sha256Bytes).toString(16);
+        return new BigInteger(1, sha256Bytes).toString(16);
     }
 }
