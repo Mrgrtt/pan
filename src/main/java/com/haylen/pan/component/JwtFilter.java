@@ -1,6 +1,7 @@
 package com.haylen.pan.component;
 
-import com.haylen.pan.util.JwtUtil;
+import com.haylen.pan.service.TokenService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,6 +21,7 @@ import java.io.IOException;
  * @author haylen
  * @date 2019-12-25
  */
+@Slf4j
 public class JwtFilter extends OncePerRequestFilter {
     @Autowired
     private UserDetailsService userDetailsService;
@@ -28,7 +30,7 @@ public class JwtFilter extends OncePerRequestFilter {
     @Value("${jwt.tokenHead}")
     private String tokenHead;
     @Autowired
-    private JwtUtil jwtUtil;
+    private TokenService tokenService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -38,7 +40,13 @@ public class JwtFilter extends OncePerRequestFilter {
         if (authHeader != null && authHeader.startsWith(this.tokenHead)) {
             // "Bearer "后为token
             String token = authHeader.substring(this.tokenHead.length() + 1);
-            String username = jwtUtil.getUsernameByToken(token);
+            String username = null;
+            try {
+                username = tokenService.getSubjectByToken(token);
+            } catch (TokenService.TokenParserException e) {
+                log.info("token parser exception {}", e.getMessage());
+            }
+
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
                 UsernamePasswordAuthenticationToken authentication =

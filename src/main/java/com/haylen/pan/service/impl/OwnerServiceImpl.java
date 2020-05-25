@@ -10,7 +10,7 @@ import com.haylen.pan.repository.OwnerRepository;
 import com.haylen.pan.service.CaptchaService;
 import com.haylen.pan.service.FileStorageService;
 import com.haylen.pan.service.OwnerService;
-import com.haylen.pan.util.JwtUtil;
+import com.haylen.pan.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,7 +34,7 @@ public class OwnerServiceImpl implements OwnerService {
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
-    private JwtUtil jwtUtil;
+    private TokenService tokenService;
     @Autowired
     private FileStorageService fileStorageService;
     @Autowired
@@ -74,7 +74,7 @@ public class OwnerServiceImpl implements OwnerService {
         if (!passwordEncoder.matches(loginParam.getPassword(), owner.getPassword())) {
             throw new ApiException("用户名或密码错误");
         }
-        return jwtUtil.builtToken(loginParam.getUsername());
+        return tokenService.builtToken(loginParam.getUsername());
     }
 
     @Override
