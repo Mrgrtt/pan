@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 /**
  * @author haylen
@@ -13,7 +14,7 @@ import javax.persistence.*;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "owner")
-public class Owner extends BaseEntity{
+public class Owner extends BaseEntity implements Serializable {
     /**
      * 用户命
      */

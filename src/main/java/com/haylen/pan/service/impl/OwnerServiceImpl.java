@@ -1,5 +1,6 @@
 package com.haylen.pan.service.impl;
 
+import cn.hutool.core.util.RandomUtil;
 import com.haylen.pan.bo.OwnerDetails;
 import com.haylen.pan.domain.dto.LoginParam;
 import com.haylen.pan.domain.dto.RegisterParam;
@@ -7,10 +8,7 @@ import com.haylen.pan.domain.dto.PasswordParam;
 import com.haylen.pan.domain.entity.Owner;
 import com.haylen.pan.exception.ApiException;
 import com.haylen.pan.repository.OwnerRepository;
-import com.haylen.pan.service.CaptchaService;
-import com.haylen.pan.service.FileStorageService;
-import com.haylen.pan.service.OwnerService;
-import com.haylen.pan.service.TokenService;
+import com.haylen.pan.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -36,10 +34,12 @@ public class OwnerServiceImpl implements OwnerService {
     private FileStorageService fileStorageService;
     @Autowired
     private CaptchaService captchaService;
+    @Autowired
+    private CacheService cacheService;
     @Value("${owner-total-space-default}")
     private Long totalSpaceDefault;
-
-    private final static String FILE_DOWNLOAD_URL = "/file/download/";
+    private final static String OWNER_CACHE_KEY = "user";
+    private final static long CACHE_TIME = 4 * 60 * 1000;
 
     @Override
     public OwnerDetails getOwnerDetailsByUsername(String name) {
@@ -92,8 +92,10 @@ public class OwnerServiceImpl implements OwnerService {
         if (!passwordEncoder.matches(passwordParam.getOldPassword(), encodeOldPassword)) {
             throw new ApiException("旧密码错误");
         }
-        return ownerRepository.updatePassword(
+        int r = ownerRepository.updatePassword(
                 passwordEncoder.encode(passwordParam.getNewPassword()),getCurrentOwnerId());
+        cacheService.delObject(OWNER_CACHE_KEY + getCurrentOwner().getUsername());
+        return r;
     }
 
     @Override
@@ -103,10 +105,16 @@ public class OwnerServiceImpl implements OwnerService {
     }
 
     private Owner getOwnerByUsername(String name) {
+        Owner owner = (Owner) cacheService.getObject(OWNER_CACHE_KEY + name);
+        if (owner != null) {
+            return owner;
+        }
         Optional<Owner> optionalOwner = ownerRepository.findByUsername(name);
         if (!optionalOwner.isPresent()) {
             throw new ApiException("用户不存在");
         }
+        cacheService.setObject(OWNER_CACHE_KEY + name,
+                optionalOwner.get(), CACHE_TIME + RandomUtil.randomLong(30 * 1000));
         return optionalOwner.get();
     }
 }
