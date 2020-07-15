@@ -2,6 +2,7 @@ package com.haylen.pan.service;
 
 import com.haylen.pan.bo.OwnerDetails;
 import com.haylen.pan.domain.dto.LoginParam;
+import com.haylen.pan.domain.dto.OwnerResult;
 import com.haylen.pan.domain.dto.RegisterParam;
 import com.haylen.pan.domain.dto.PasswordParam;
 import com.haylen.pan.domain.entity.Owner;
@@ -49,9 +50,4 @@ public interface OwnerService {
      * 该用户名是否已被注册
      */
     Boolean isRegistered(String name);
-
-    /**
-     * 头像上传
-     */
-    int uploadAvatar(MultipartFile file);
 }

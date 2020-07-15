@@ -7,7 +7,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
@@ -26,10 +25,11 @@ public class OwnerController {
     @ApiOperation("注册")
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     public CommonResult register(@Valid @RequestBody RegisterParam registerParam) {
-        if (ownerService.register(registerParam) == null) {
+        Owner owner= ownerService.register(registerParam);
+        if (owner == null) {
             return CommonResult.failed();
         }
-        return CommonResult.success();
+        return CommonResult.success(OwnerResult.valueOf(owner));
     }
 
     @ApiOperation("登陆")
@@ -59,17 +59,8 @@ public class OwnerController {
 
     @ApiOperation("获取用户信息")
     @RequestMapping(value = "/info", method = RequestMethod.GET)
-    public CommonResult<OwnerInfoResult> getInfo() {
+    public CommonResult<OwnerResult> getInfo() {
         Owner owner = ownerService.getCurrentOwner();
-        return CommonResult.success(OwnerInfoResult.valueOf(owner));
-    }
-
-    @ApiOperation("上传头像")
-    @RequestMapping(value = "/avatar/upload", method = RequestMethod.POST)
-    public CommonResult uploadAvatar(@RequestPart MultipartFile file) {
-        if (ownerService.uploadAvatar(file) <= 0) {
-            return CommonResult.failed();
-        }
-        return CommonResult.success();
+        return CommonResult.success(OwnerResult.valueOf(owner));
     }
 }

@@ -29,14 +29,6 @@ public interface OwnerRepository extends JpaRepository<Owner, Long> {
     int updatePassword(String newPassword, Long id);
 
     /**
-     * 更新头像URL
-     */
-    @Modifying
-    @Transactional(rollbackFor = Exception.class)
-    @Query("update Owner o set o.avatar = ?1, o.gmtModified = current_timestamp where id = ?2")
-    int updateAvatar(String avatar, Long id);
-
-    /**
      *获取已用存储空间
      */
     @Query("select o.usedStorageSpace from Owner o where o.id = ?1")

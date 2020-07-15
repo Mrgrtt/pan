@@ -24,10 +24,11 @@ public interface FileService {
     File upload(MultipartFile multipartFile, Long folderId, Long ownerId);
 
     /**
-     * 获取文件类型
+     * 获取文件
      * @param key 储存key
+     * @param ownerId 用户id
      */
-    String getFileTypeByStorageKey(String key);
+    File getFile(String key, long ownerId);
 
     /**
      * 下载文件

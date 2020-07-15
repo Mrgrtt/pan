@@ -34,9 +34,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private OwnerService ownerService;
     private final static String[] WHITE_LIST = {
-            "/owner/register*",
+            "/owner/register**",
             "/owner/login*",
-            "/file/download/*",
             "/owner/isRegister*",
             "/captcha/**",
             "/swagger-ui.html",

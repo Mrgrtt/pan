@@ -1,6 +1,7 @@
 package com.haylen.pan.controller;
 
 import com.haylen.pan.domain.dto.CommonResult;
+import com.haylen.pan.domain.dto.FileResult;
 import com.haylen.pan.domain.entity.File;
 import com.haylen.pan.service.FileService;
 import com.haylen.pan.service.OwnerService;
@@ -21,6 +22,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -38,27 +40,20 @@ public class FileController {
 
     @ApiOperation("上传文件")
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
-    public CommonResult<File> upload(@RequestPart MultipartFile file,
-                               @RequestParam(defaultValue = "0") Long folderId) {
+    public CommonResult<FileResult> upload(@RequestPart MultipartFile file,
+                                           @RequestParam(defaultValue = "0") Long folderId) {
         File result = fileService.upload(file, folderId, ownerService.getCurrentOwnerId());
         if (result == null) {
             return CommonResult.failed();
         }
-        return CommonResult.success(result);
+        return CommonResult.success(FileResult.valueOf(result));
     }
 
-    @ApiOperation("下载文件（无需登陆)")
+    @ApiOperation("下载文件")
     @RequestMapping(value = "/download/{key}", method = RequestMethod.GET)
     public ResponseEntity<StreamingResponseBody> download(@PathVariable String key,
-                        @RequestParam(defaultValue = "file") String fileName,
                         @RequestHeader(name = "Range", required = false) String rangeHeader){
-        String fileType = MediaType.IMAGE_JPEG_VALUE;
-
-        // 非网盘文件默认类型为图片，如上传的头像
-        String type = fileService.getFileTypeByStorageKey(key);
-        if (type != null) {
-            fileType = type;
-        }
+        File file = fileService.getFile(key, ownerService.getCurrentOwnerId());
         long fileLength = 0;
 
         InputStream inputStream = fileService.download(key);
@@ -107,19 +102,22 @@ public class FileController {
         headers.add("Accept-Ranges", "bytes");
         headers.add("Content-Range", "bytes " + rangeStart + "-" + (rangeEnd - 1) + "/" + fileLength);
         headers.add("Content-Disposition",
-                "attachment; filename*=UTF-8''" + URLEncoder.encode(fileName, StandardCharsets.UTF_8));
+                "attachment; filename*=UTF-8''" + URLEncoder.encode(file.getName(), StandardCharsets.UTF_8));
         return ResponseEntity.status(206)
                 .contentLength(contentLength)
-                .contentType(MediaType.valueOf(fileType))
+                .contentType(MediaType.valueOf(file.getMediaType()))
                 .headers(headers)
                 .body(streamingResponseBody);
     }
 
     @ApiOperation("获取文件夹下的文件列表")
     @RequestMapping(value = "/list/{folderId}", method = RequestMethod.GET)
-    public CommonResult<List<File>> list(@PathVariable Long folderId) {
-        // todo: swagger ui 上显示错误的File类
-        return CommonResult.success(fileService.listFile(folderId, ownerService.getCurrentOwnerId()));
+    public CommonResult<List<FileResult>> list(@PathVariable Long folderId) {
+        List<FileResult> results = new ArrayList<>();
+        for (File file: fileService.listFile(folderId, ownerService.getCurrentOwnerId())) {
+            results.add(FileResult.valueOf(file));
+        }
+        return CommonResult.success(results);
     }
 
     @ApiOperation("重命名文件")

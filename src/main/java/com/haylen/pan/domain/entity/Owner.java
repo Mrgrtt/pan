@@ -27,12 +27,6 @@ public class Owner extends BaseEntity{
     private String password;
 
     /**
-     * 头像url
-     */
-    @Column(name = "avatar", columnDefinition = "varchar(128) default ''", nullable = false)
-    private String avatar;
-
-    /**
      * 总储存空间(byte)
      */
     @Column(name = "total_storage_space", columnDefinition = "bigint unsigned default 0", nullable = false)

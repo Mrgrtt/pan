@@ -23,12 +23,6 @@ public interface FileRepository extends JpaRepository<File, Long> {
     Optional<File> findFileByIdAndOwnerId(Long id, Long ownerId);
 
     /**
-     * 根据储存key获取文件
-     * @param storageKey 储存key
-     */
-    List<File> findFilesByStorageKey(String storageKey);
-
-    /**
      * 获取指定目录下的文件
      */
     @Query("select f from File f where f.folderId = ?1 and f.ownerId = ?2 and f.status = 0")
@@ -93,4 +87,11 @@ public interface FileRepository extends JpaRepository<File, Long> {
      */
     @Query("select f from File f where f.folderId = ?1 and f.ownerId = ?2")
     List<File> listAnyStatusFile(Long folderId, Long ownerId);
+
+    /**
+     * @param key 存储key
+     * @param ownerId 用户id
+     * @return 文件
+     */
+    Optional<File> getFileByStorageKeyAndOwnerId(String key, long ownerId);
 }

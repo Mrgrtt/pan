@@ -1,6 +1,7 @@
 package com.haylen.pan.controller;
 
 import com.haylen.pan.domain.dto.CommonResult;
+import com.haylen.pan.domain.dto.FolderResult;
 import com.haylen.pan.domain.entity.Folder;
 import com.haylen.pan.service.FolderService;
 import com.haylen.pan.service.OwnerService;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotEmpty;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,14 +35,18 @@ public class FolderController {
         if (folder == null) {
             return CommonResult.failed();
         }
-        return CommonResult.success(folder);
+        return CommonResult.success(FolderResult.valueOf(folder));
     }
 
     @ApiOperation("获取子文件夹列表")
     @RequestMapping(value = "/list/{id}", method = RequestMethod.GET)
-    public CommonResult<List<Folder>> list(@PathVariable Long id) {
+    public CommonResult<List<FolderResult>> list(@PathVariable Long id) {
         List<Folder> list = folderService.listChildFolder(id, ownerService.getCurrentOwnerId());
-        return CommonResult.success(list);
+        List<FolderResult> folderResults = new ArrayList<>();
+        for (Folder folder: list) {
+            folderResults.add(FolderResult.valueOf(folder));
+        }
+        return CommonResult.success(folderResults);
     }
 
     @ApiOperation("移动文件夹")

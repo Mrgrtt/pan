@@ -62,12 +62,12 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public String getFileTypeByStorageKey(String key) {
-        List<File> files = fileRepository.findFilesByStorageKey(key);
-        if (files.size() <= 0) {
-            return null;
+    public File getFile(String key, long ownerId) {
+        Optional<File> o = fileRepository.getFileByStorageKeyAndOwnerId(key, ownerId);
+        if (!o.isPresent()) {
+            throw new ApiException("文件不存在");
         }
-        return files.get(0).getMediaType();
+        return o.get();
     }
 
     @Override
