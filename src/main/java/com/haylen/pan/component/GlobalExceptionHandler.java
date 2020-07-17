@@ -14,6 +14,7 @@ import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import javax.validation.ConstraintViolationException;
 
@@ -27,7 +28,8 @@ import javax.validation.ConstraintViolationException;
 public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({HttpMessageNotReadableException.class, MissingServletRequestParameterException.class, BindException.class,
-            ServletRequestBindingException.class, MethodArgumentNotValidException.class, ConstraintViolationException.class})
+            ServletRequestBindingException.class, MethodArgumentNotValidException.class, ConstraintViolationException.class,
+            MethodArgumentTypeMismatchException.class})
     public CommonResult handleHttpMessageNotReadableException(Exception e) {
         if (e instanceof BindException){
             return CommonResult.validateFailed(((BindException)e)
@@ -55,7 +57,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(DataAccessException.class)
     public CommonResult handleDataAccessException(DataAccessException e) {
-        log.error(e.getMessage());
+        log.error("数据访问异常", e);
         return CommonResult.validateFailed();
     }
 

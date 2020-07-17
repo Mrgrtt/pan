@@ -1,14 +1,12 @@
 package com.haylen.pan.service.impl;
 
+import cn.hutool.core.util.RandomUtil;
 import com.haylen.pan.domain.entity.File;
 import com.haylen.pan.domain.entity.Owner;
 import com.haylen.pan.exception.ApiException;
 import com.haylen.pan.repository.FileRepository;
 import com.haylen.pan.repository.OwnerRepository;
-import com.haylen.pan.service.FolderService;
-import com.haylen.pan.service.FileService;
-import com.haylen.pan.service.FileStorageService;
-import com.haylen.pan.service.OwnerService;
+import com.haylen.pan.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,6 +34,9 @@ public class FileServiceImpl implements FileService {
     private OwnerService ownerService;
     @Autowired
     private OwnerRepository ownerRepository;
+    @Autowired
+    private CacheService cacheService;
+    private final static long SHARE_FILE_EXPIRATION = 24 * 60 * 60 * 1000;
 
     @Override
     public File upload(MultipartFile multipartFile, Long folderId, Long ownerId) {
@@ -62,8 +63,8 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public File getFile(String key, long ownerId) {
-        Optional<File> o = fileRepository.getFileByStorageKeyAndOwnerId(key, ownerId);
+    public File getFile(long id, long ownerId) {
+        Optional<File> o = fileRepository.findFileByIdAndOwnerId(id, ownerId);
         if (!o.isPresent()) {
             throw new ApiException("文件不存在");
         }
@@ -83,7 +84,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public int rename(String newName, Long id, Long ownerId) {
-        File file = getFileById(id, ownerId);
+        File file = getFile(id, ownerId);
         if (file.getName().equals(newName)) {
             return 1;
         }
@@ -99,7 +100,7 @@ public class FileServiceImpl implements FileService {
             throw new ApiException("不存在该目录");
         }
 
-        File file = getFileById(id, ownerId);
+        File file = getFile(id, ownerId);
         if (file.getOwnerId().equals(newFolderId)) {
             return 1;
         }
@@ -120,7 +121,7 @@ public class FileServiceImpl implements FileService {
         }
         File file = optionalFile.get();
         if (file.getStatus().equals(deletedStatus)) {
-            return ;
+            return;
         }
         /* 删除回收站中的文件不更新已用空间 */
         if (file.getStatus().equals(normalStatus)) {
@@ -141,7 +142,7 @@ public class FileServiceImpl implements FileService {
         if (folderService.notExisted(toFolderId, ownerId)) {
             throw new ApiException("目标文件夹不存在");
         }
-        File oldFile = getFileById(id, ownerId);
+        File oldFile = getFile(id, ownerId);
         if (oldFile.getFolderId().equals(toFolderId)) {
             return oldFile;
         }
@@ -156,12 +157,12 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public int toRecycleBin(Long id, Long ownerId) {
-        File file = getFileById(id, ownerId);
+        File file = getFile(id, ownerId);
         ownerRepository.reduceUsedStorageSpace(file.getSize(), ownerId);
         return fileRepository.updateStatus(id, ownerId, 1);
     }
 
-    private File copy(Long folderId,File oldFile) {
+    private File copy(Long folderId, File oldFile) {
         File newFile = new File();
         newFile.setGmtModified(LocalDateTime.now());
         newFile.setGmtCreate(LocalDateTime.now());
@@ -185,11 +186,23 @@ public class FileServiceImpl implements FileService {
         ownerRepository.increaseUsedStorageSpace(expectedSize, owner.getId());
     }
 
-    private File getFileById(Long id, Long ownerId) {
-        Optional<File> optionalFile = fileRepository.
-                findFileByIdAndOwnerId(id, ownerId);
+    @Override
+    public String share(long id, long ownerId) {
+        File file = getFile(id, ownerId);
+        String token = RandomUtil.randomString(5) + file.getId();
+        cacheService.setObject(token, file.getId(), SHARE_FILE_EXPIRATION);
+        return token;
+    }
+
+    @Override
+    public File getFileByShareToken(String token) {
+        Long id = (Long) cacheService.getObject(token);
+        if(id == null) {
+            throw new ApiException("分享文件已过期");
+        }
+        Optional<File> optionalFile = fileRepository.findById(id);
         if (!optionalFile.isPresent()) {
-            throw new ApiException("文件不存在");
+            throw new ApiException("分享的文件已被删除");
         }
         return optionalFile.get();
     }

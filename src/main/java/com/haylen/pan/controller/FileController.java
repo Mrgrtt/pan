@@ -50,64 +50,11 @@ public class FileController {
     }
 
     @ApiOperation("下载文件")
-    @RequestMapping(value = "/download/{key}", method = RequestMethod.GET)
-    public ResponseEntity<StreamingResponseBody> download(@PathVariable String key,
+    @RequestMapping(value = "/download/{id}", method = RequestMethod.GET)
+    public ResponseEntity<StreamingResponseBody> download(@PathVariable Long id,
                         @RequestHeader(name = "Range", required = false) String rangeHeader){
-        File file = fileService.getFile(key, ownerService.getCurrentOwnerId());
-        long fileLength = 0;
-
-        InputStream inputStream = fileService.download(key);
-        try {
-            fileLength = inputStream.available();
-        } catch (IOException e) {
-            try {
-                inputStream.close();
-            } catch (IOException ignored) {
-            }
-            return ResponseEntity.badRequest().build();
-        }
-        long rangeStart = 0;
-        long rangeEnd = fileLength;
-        if (rangeHeader != null) {
-            //example: bytes=0-1023 表示从0取到1023，长度为1024
-            String[] ranges = rangeHeader.substring("bytes=".length()).split("-");
-            rangeStart = Long.parseLong(ranges[0]);
-            if (ranges.length > 1) {
-                rangeEnd = Long.parseLong(ranges[1]) + 1;
-            }
-        }
-        final long skip = rangeStart;
-        final long contentLength = rangeEnd - rangeStart;
-        StreamingResponseBody streamingResponseBody = new StreamingResponseBody() {
-            @Override
-            public void writeTo(OutputStream outputStream) throws IOException {
-                BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-                bufferedInputStream.skip(skip);
-                byte[] bytes = new byte[1024];
-                long readSum = 0;
-                int readCount = 0;
-                while ((readCount = bufferedInputStream.read(bytes)) != -1) {
-                    if (readSum + readCount > contentLength) {
-                        outputStream.write(bytes, 0, (int) (contentLength - readSum));
-                    } else {
-                        outputStream.write(bytes, 0, readCount);
-                    }
-                    readSum = readSum + readCount;
-                }
-                outputStream.flush();
-                inputStream.close();
-            }
-        };
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Accept-Ranges", "bytes");
-        headers.add("Content-Range", "bytes " + rangeStart + "-" + (rangeEnd - 1) + "/" + fileLength);
-        headers.add("Content-Disposition",
-                "attachment; filename*=UTF-8''" + URLEncoder.encode(file.getName(), StandardCharsets.UTF_8));
-        return ResponseEntity.status(206)
-                .contentLength(contentLength)
-                .contentType(MediaType.valueOf(file.getMediaType()))
-                .headers(headers)
-                .body(streamingResponseBody);
+        File file = fileService.getFile(id, ownerService.getCurrentOwnerId());
+        return download(file, rangeHeader);
     }
 
     @ApiOperation("获取文件夹下的文件列表")
@@ -172,4 +119,74 @@ public class FileController {
         return CommonResult.success();
     }
 
+    @ApiOperation("分享文件")
+    @RequestMapping(value = "/share/{id}", method = RequestMethod.GET)
+    public CommonResult share(@PathVariable long id) {
+        return CommonResult.success(fileService.share(id, ownerService.getCurrentOwnerId()));
+    }
+
+
+    @ApiOperation("下载被分享文件")
+    @RequestMapping(value = "/share/download/{token}", method = RequestMethod.GET)
+    public ResponseEntity<StreamingResponseBody> downloadShared(@PathVariable String token,
+             @RequestHeader(name = "Range", required = false) String rangeHeader) {
+        return download(fileService.getFileByShareToken(token), rangeHeader);
+    }
+
+    private ResponseEntity<StreamingResponseBody> download(File file, String rangeHeader) {
+        long fileLength = 0;
+
+        InputStream inputStream = fileService.download(file.getStorageKey());
+        try {
+            fileLength = inputStream.available();
+        } catch (IOException e) {
+            try {
+                inputStream.close();
+            } catch (IOException ignored) {
+            }
+            return ResponseEntity.badRequest().build();
+        }
+        long rangeStart = 0;
+        long rangeEnd = fileLength;
+        if (rangeHeader != null) {
+            //example: bytes=0-1023 表示从0取到1023，长度为1024
+            String[] ranges = rangeHeader.substring("bytes=".length()).split("-");
+            rangeStart = Long.parseLong(ranges[0]);
+            if (ranges.length > 1) {
+                rangeEnd = Long.parseLong(ranges[1]) + 1;
+            }
+        }
+        final long skip = rangeStart;
+        final long contentLength = rangeEnd - rangeStart;
+        StreamingResponseBody streamingResponseBody = new StreamingResponseBody() {
+            @Override
+            public void writeTo(OutputStream outputStream) throws IOException {
+                BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+                bufferedInputStream.skip(skip);
+                byte[] bytes = new byte[1024];
+                long readSum = 0;
+                int readCount = 0;
+                while ((readCount = bufferedInputStream.read(bytes)) != -1) {
+                    if (readSum + readCount > contentLength) {
+                        outputStream.write(bytes, 0, (int) (contentLength - readSum));
+                    } else {
+                        outputStream.write(bytes, 0, readCount);
+                    }
+                    readSum = readSum + readCount;
+                }
+                outputStream.flush();
+                inputStream.close();
+            }
+        };
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Accept-Ranges", "bytes");
+        headers.add("Content-Range", "bytes " + rangeStart + "-" + (rangeEnd - 1) + "/" + fileLength);
+        headers.add("Content-Disposition",
+                "attachment; filename*=UTF-8''" + URLEncoder.encode(file.getName(), StandardCharsets.UTF_8));
+        return ResponseEntity.status(206)
+                .contentLength(contentLength)
+                .contentType(MediaType.valueOf(file.getMediaType()))
+                .headers(headers)
+                .body(streamingResponseBody);
+    }
 }

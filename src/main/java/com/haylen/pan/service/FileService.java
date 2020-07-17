@@ -25,10 +25,10 @@ public interface FileService {
 
     /**
      * 获取文件
-     * @param key 储存key
+     * @param id 文件id
      * @param ownerId 用户id
      */
-    File getFile(String key, long ownerId);
+    File getFile(long id, long ownerId);
 
     /**
      * 下载文件
@@ -100,6 +100,22 @@ public interface FileService {
 
     /**
      * 检查并增加已用空间
+     * @param expectedSize 待增加空间
      */
     void checkAndIncreaseUsedStorageSpace(Long expectedSize);
+
+    /**
+     * 分享文件
+     * @param id 文件id
+     * @param ownerId 用户id
+     * @return token
+     */
+    String share(long id, long ownerId);
+
+    /**
+     * 通过token获取被分享的文件
+     * @param token token
+     * @return file
+     */
+    File getFileByShareToken(String token);
 }

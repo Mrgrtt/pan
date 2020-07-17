@@ -87,11 +87,4 @@ public interface FileRepository extends JpaRepository<File, Long> {
      */
     @Query("select f from File f where f.folderId = ?1 and f.ownerId = ?2")
     List<File> listAnyStatusFile(Long folderId, Long ownerId);
-
-    /**
-     * @param key 存储key
-     * @param ownerId 用户id
-     * @return 文件
-     */
-    Optional<File> getFileByStorageKeyAndOwnerId(String key, long ownerId);
 }
